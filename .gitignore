@@ -1,0 +1,13 @@
+# Fast Forward
+ff.exe
+cygwin1.dll
+
+# Directories
+extra/
+
+# Latex temporary files
+*.log
+*.synctex.gz
+*.toc
+*.aux
+*.out
