@@ -3,8 +3,8 @@
 
     ;; Definición de objetos
     (:objects
-        bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 bb_s6 bb_s7 bb_s8 bb_s9 bb_s10 bb_s11 bb_s12 aa1 aa2 aa3 cc1 cc2 - content
-        day1 day2 day3 day4 day5 day6 day7 day8 day9 day10 day11 day12 - day
+        bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
+        day1 day2 day3 day4 day5 day6 day7 - day
     )
 
     ;; Estado inicial
@@ -12,10 +12,8 @@
         ;; Contenidos ya vistos
 
         ;; Contenidos por ver
-        (is_wanted bb_s12)
+        (is_wanted bb_s5)
         (is_wanted cc2)
-
-        ;(day_to_watch bb_s5 day4)
 
         ;; Relaciones entre contenidos
         ;;predecesores
@@ -23,32 +21,27 @@
         (predecessor bb_s2 bb_s3)
         (predecessor bb_s3 bb_s4)
         (predecessor bb_s4 bb_s5)
-        (predecessor bb_s5 bb_s6)
-        (predecessor bb_s6 bb_s7)
-        (predecessor bb_s7 bb_s8)
-        (predecessor bb_s8 bb_s9)
-        (predecessor bb_s9 bb_s10)
-        (predecessor bb_s10 bb_s11)
-        (predecessor bb_s11 bb_s12)
         (predecessor cc1 cc2)
 
         ;;paralelos
-        (parallel aa1 bb_s12)
-        (parallel aa2 bb_s12)
-        (parallel aa3 bb_s12)
+        (parallel aa1 bb_s5)
+        (parallel aa2 bb_s5)
+        (parallel aa3 bb_s5)
 
         ;; Dias anteriores
-        (yesterday day1 day2)
-        (yesterday day2 day3)
-        (yesterday day3 day4)
-        (yesterday day4 day5)
-        (yesterday day5 day6)
-        (yesterday day6 day7)
-        (yesterday day7 day8)
-        (yesterday day8 day9)
-        (yesterday day9 day10)
-        (yesterday day10 day11)
-        (yesterday day11 day12)
+        (previous day1 day2)
+        (previous day1 day3)
+        (previous day1 day4)
+        (previous day1 day5)
+
+        (previous day2 day3)
+        (previous day2 day4)
+        (previous day2 day5)
+
+        (previous day3 day4)
+        (previous day3 day5)
+
+        (previous day4 day5)
 
     )
 
