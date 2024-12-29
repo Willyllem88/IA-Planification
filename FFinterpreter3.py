@@ -89,8 +89,18 @@ def display_plan(plan_by_day):
 
 # Bloque principal para ejecutar el script
 if __name__ == '__main__':
+    print("Planificador de Contenidos de Redflix\n")
+    print("Escoja que desea ejecutar:")
+    print("[0] Fast Forward (FF)")
+    print("[1] Metric Fast Forward (MFF)")
+    decision = int(input())
+
+    if decision == 0:
     # Ejecuta el comando FF y captura su salida estándar (stdout)
-    result = subprocess.run(["./ff.exe", "-o", "redflix.pddl", "-f", "redflix-problem.pddl"], 
+        result = subprocess.run(["./ff.exe", "-o", "redflix.pddl", "-f", "redflix-problem.pddl"], 
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    else:
+        result = subprocess.run(["./metricff.exe", "-o", "redflixExtensio4.pddl", "-f", "redflixExtensio4-problem.pddl"], 
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
     print(result.stdout)  # Muestra la salida de FF

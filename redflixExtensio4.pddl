@@ -44,7 +44,7 @@
             (is_wanted ?c)
             (not (watched ?c))
             ;;(not (exists (?d2 - day) (day_to_watch ?c ?d2)))  ; Asegura que no está asignado a otro día
-            ;;(not (assigned ?c))
+            (not (assigned ?c))
             (<= (+ (day_duration ?d) (duration ?c)) 250) ; Verifica que no se pase de 200 minutos
             ;; Verifica que no haya sucesores que no hayan sido vistos
             (not (exists (?c2 - content) 
@@ -71,7 +71,7 @@
         :precondition (and 
             (is_wanted ?c1)
             (not (exists (?d2 - day) (day_to_watch ?c1 ?d2)))  ; Asegura que no está asignado a otro día
-            ;;(not (assigned ?c1))
+            (not (assigned ?c1))
             (<= (+ (day_duration ?d1) (duration ?c1)) 200) ; Verifica que no se pase de 200 minutos
             ;(predecessor ?c1 ?c2)
             ;(day_to_watch ?c2 ?d2)
