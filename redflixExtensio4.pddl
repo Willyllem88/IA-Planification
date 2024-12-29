@@ -43,7 +43,6 @@
         :precondition (and 
             (is_wanted ?c)
             (not (watched ?c))
-            ;;(not (exists (?d2 - day) (day_to_watch ?c ?d2)))  ; Asegura que no está asignado a otro día
             (not (assigned ?c))
             (<= (+ (day_duration ?d) (duration ?c)) 200) ; Verifica que no se pase de 200 minutos
             ;; Verifica que no haya sucesores  ni contenidos paralelos que no hayan sido vistos
@@ -65,15 +64,9 @@
         :parameters (?c1 ?c2 - content ?d1 ?d2 - day)
         :precondition (and 
             (is_wanted ?c1)
-            (not (exists (?d2 - day) (day_to_watch ?c1 ?d2)))  ; Asegura que no está asignado a otro día
-            (not (assigned ?c1))
+            (not (assigned ?c1)) ;asegura que no tiene un día asignado
             (<= (+ (day_duration ?d1) (duration ?c1)) 200) ; Verifica que no se pase de 200 minutos
-            ;(predecessor ?c1 ?c2)
-            ;(day_to_watch ?c2 ?d2)
-            ;(or 
-            ;(yesterday ?d1 ?d2)
-             ;   (= ?d1 ?d2))
-
+   
             (or 
                 ;condiciones para contenido paralelo
                 (and
