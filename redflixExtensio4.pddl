@@ -46,16 +46,11 @@
             ;;(not (exists (?d2 - day) (day_to_watch ?c ?d2)))  ; Asegura que no está asignado a otro día
             (not (assigned ?c))
             (<= (+ (day_duration ?d) (duration ?c)) 200) ; Verifica que no se pase de 200 minutos
-            ;; Verifica que no haya sucesores que no hayan sido vistos
+            ;; Verifica que no haya sucesores  ni contenidos paralelos que no hayan sido vistos
             (not (exists (?c2 - content) 
                 (and 
-                    (predecessor ?c ?c2)
-                    (not (watched ?c2)))))
-            ;; Verifica que no haya contenidos paralelos que no hayan sido vistos
-            (not (exists (?c2 - content) 
-                (and 
-                    (parallel ?c ?c2)
-                    (not (watched ?c2)))))
+                    (or (predecessor ?c ?c2) (parallel ?c ?c2))
+                    (not (watched ?c2)))))           
         )
         :effect (and 
             (day_to_watch ?c ?d)
