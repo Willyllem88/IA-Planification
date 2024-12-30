@@ -92,17 +92,28 @@ if __name__ == '__main__':
     print("Planificador de Contenidos de Redflix\n")
     print("Escoja que desea ejecutar:")
     print("[0] Fast Forward (FF)")
-    print("[1] Metric Fast Forward (MFF)")
+    print("[1] Metric Fast Forward (MFF) Random Problem")
+    print("[2] Metric Fast Forward (MFF)")
     decision = int(input())
 
     if decision == 0:
     # Ejecuta el comando FF y captura su salida estándar (stdout)
         result = subprocess.run(["./ff.exe", "-o", "redflix.pddl", "-f", "redflix-problem.pddl"], 
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    elif decision == 1:
+        create = input("Do you want to generate new random problem? (n/y): ")
+        if create == "y":
+            subprocess.run(["python", "ExamplesGenerator.py"])
+        choice = int(input("Choose a random problem to solve (1-5): "))
+        redflix = f'./random_problems/problem_{choice}.pddl'
+        print(redflix)
+        result = subprocess.run(["./metricff.exe", "-o", "redflixExtensio4.pddl", "-f", redflix], 
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     else:
         result = subprocess.run(["./metricff.exe", "-o", "redflixExtensio4.pddl", "-f", "redflixExtensio4-problem.pddl"], 
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     
+
     print(result.stdout)  # Muestra la salida de FF
     
     # Lee la salida de FF

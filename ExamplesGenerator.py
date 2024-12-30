@@ -8,11 +8,8 @@ def add_to_plan(is_wanted, predecessors, parallels):
     temp = is_wanted.copy()
    
     while  len(temp) > 0:
-        print(len(temp))
         c = temp[-1]
-        print(c)
         temp.pop()
-        print(len(temp))
         for pair in predecessors:
             if pair[1] == c:
                 if pair[0] not in all:
@@ -25,7 +22,6 @@ def add_to_plan(is_wanted, predecessors, parallels):
                     temp.append(pair[0])
                     all.append(pair[0])
                     n += 1
-    print("finish")
     return n
     
 
@@ -48,14 +44,16 @@ def generate_random_problem(filename="random_problem.pddl"):
     # Generate random relationships and goals
     is_wanted = random.sample(contents, random.randint(3, num_contents-4))
     
+    unique_predecessors = set()
     for i in range(len(contents) - 1):
         if random.choice([True, False]):
             predecessors.append((contents[i], contents[i + 1]))
+            unique_predecessors.add(contents[i + 1])
+            unique_predecessors.add(contents[i])
     
-
     for _ in range(random.randint(5, 10)):
         c1, c2 = random.sample(contents, 2)
-        if (c1, c2) not in predecessors and (c2, c1) not in predecessors and (c2, c1) not in parallels and (c1, c2) not in parallels:
+        if (c1, c2) not in predecessors and (c2, c1) not in predecessors and (c2, c1) not in parallels and (c1, c2) not in parallels and c1 not in unique_predecessors:
             parallels.append((c1, c2))
     
     to_plan = add_to_plan(is_wanted, predecessors, parallels)
