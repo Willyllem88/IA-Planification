@@ -18,6 +18,7 @@
         (total-days)
         (duration ?c - content)
         (day_duration ?d - day)
+        (remaining-content)  ; Number of unassigned wanted contents
     )
 
 
@@ -56,6 +57,7 @@
             (assigned ?c)
             (increase (day_duration ?d) (duration ?c))
             (increase (total-days) 1)  ; Incrementa días usados
+            (decrease (remaining-content) 1)  ; Decrementa contenidos por ver
         )
     )  
 
@@ -89,6 +91,7 @@
             (increase (total-days) 1)
             (increase (day_duration ?d1) (duration ?c1))           
             (assigned ?c1)
+            (decrease (remaining-content) 1) ; Decrementa contenidos por ver
         )
     )
 )

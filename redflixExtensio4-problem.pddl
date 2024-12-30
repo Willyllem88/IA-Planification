@@ -85,18 +85,14 @@
 
         (= (total-days) 0)
 
+        (= (remaining-content) 17)  ; Total number of is_wanted content
+
     )
 
     ;; Contenidos objetivo
     (:goal
         (and
-            ;;(day_to_watch bb_s1 day1)
-            (assigned aa1)
-            (assigned aa2)
-            (assigned aa3)
-            (assigned cc1)
-            (assigned bb_s1)
-            (day_to_watch bb_s1 day1)
+               (= (remaining-content) 0)    ; All content has been assigned
         )
     )
 
