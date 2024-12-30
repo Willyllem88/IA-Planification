@@ -32,7 +32,7 @@
         :effect (and 
             ;; Si el contenido visto tiene un sucesor o algun contenido en paralelo a ver, se agrega a la lista de contenidos por ver
             (forall (?c2 - content)
-                (when (or (predecessor ?c2 ?c)(parallel ?c2 ?c)(parallel ?c ?c2))
+                (when (and (or (predecessor ?c2 ?c)(parallel ?c2 ?c))(not (is_wanted ?c2)) (not (watched ?c2)) )
                     (is_wanted ?c2))   
             )
         )
@@ -48,9 +48,12 @@
             (<= (+ (day_duration ?d) (duration ?c)) 200) ; Verifica que no se pase de 200 minutos
             ;; Verifica que no haya sucesores  ni contenidos paralelos que no hayan sido vistos
             (not (exists (?c2 - content) 
+                
                 (and 
                     (or (predecessor ?c ?c2) (parallel ?c ?c2))
-                    (not (watched ?c2)))))           
+                    (not (watched ?c2))
+                    (is_wanted ?c2)))
+            )           
         )
         :effect (and 
             (day_to_watch ?c ?d)
