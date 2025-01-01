@@ -1,0 +1,173 @@
+\documentclass[a4paper]{article}
+\usepackage[a4paper,left=3cm,right=2cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\floatname{algorithm}{Algorisme} % Cambia "Algorithm" por "Algorisme"
+
+\usepackage{algpseudocode}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{array}
+
+\title{\textbf{Intel·ligència Artificial:\\
+		Pràctica Planificació}}
+\author{\emph{Guillem Cabré, Carla Cordero, Hannah Röber}}
+\date{Curs 2024-25, Quadrimestre de tardor}
+
+\renewcommand*\contentsname{Continguts}
+\renewcommand{\figurename}{Figura}
+\renewcommand{\tablename}{Taula}
+
+\begin{document}
+	
+	\begin{titlepage}
+		\clearpage\maketitle
+		\thispagestyle{empty}
+	\end{titlepage}
+	
+	\tableofcontents
+	\clearpage
+	
+	
+	\section{Modelatge del Domini}
+	El domini \textbf{Redflix} s'ha creat per capturar les dependències entre continguts audiovisuals (pel·lícules, capítols de sèries) i les restriccions associades amb la seva assignació a dies en un pla de visionat.
+	
+	\subsection{Variables}
+	S'han definit dos tipus principals:
+	\begin{itemize}
+		\item \textbf{\texttt{content}}: Representa els continguts audiovisuals (capítols o pel·lícules).
+		\item \textbf{\texttt{day}}: Representa els dies disponibles per al pla de visionat.
+	\end{itemize}
+	
+	\subsection{Predicats}
+	Els predicats representen les relacions i restriccions entre els continguts i els dies i són la base per definir les precondicions i efectes de les accions. Són els següents:
+	
+	\begin{itemize}
+		\item \texttt{(watched ?c - content)}: Indica que un contingut \texttt{?c} ja s'ha vist.
+		\item \texttt{(is\_wanted ?c - content)}: Indica que l'usuari pot veure un contingut \texttt{?c}.
+		\item \texttt{(predecessor ?c2 - content ?c1 - content)}: Defineix que \texttt{?c1} s'ha de veure abans que \texttt{?c2}.
+		\item \texttt{(day\_to\_watch ?c - content ?d - day)}: Assigna un contingut \texttt{?c} a un dia \texttt{?d}.
+		\item \texttt{(previous ?d1 - day ?d2 - day)}: Indica que \texttt{?d1} és el dia anterior a \texttt{?d2}.
+		\item \texttt{(parallel ?c1 - content ?c2 - content)}: Estableix que \texttt{?c1} i \texttt{?c2} són paral·lels i s'han de veure el mateix dia o en dies consecutius.
+		\item \texttt{(assigned ?c - content)}: Marca que un contingut \texttt{?c} ja té un dia assignat.
+		\item \texttt{(assigned\_one ?d - day)}, \texttt{(assigned\_two ?d - day)}, \texttt{(assigned\_three ?d - day)}: Indiquen que s'han assignat un, dos o tres continguts a un dia \texttt{?d}.
+	\end{itemize}
+	
+	\subsection{Funcions}
+	Les funcions introdueixen fluents per gestionar informació numèrica. Aquestes només es fan servir per l'Extensió 4:
+	
+	\begin{itemize}
+		\item \texttt{(total-days)}: Registra el nombre total de dies utilitzats. Necessari per optimitzar el pla.
+		\item \texttt{(duration ?c - content)}: Assigna la durada de cada contingut, modelant restriccions de temps.
+		\item \texttt{(day\_duration ?d - day)}: Registra la durada acumulada dels continguts assignats a un dia.
+		\item \texttt{(remaining-content)}: Indica el nombre de continguts desitjats encara no assignats, permetent controlar l'avanç cap a l'objectiu.
+	\end{itemize}
+	
+	\subsection{Accions}
+	S'han definit tres accions principals per construir el pla de visionat:
+	
+	\subsubsection{add\_content}
+	Aquesta acció afegeix continguts relacionats a la llista de continguts que l'usuari vol veure.
+	\begin{itemize}
+		\item \textbf{Precondicions}: El contingut no s'ha vist i és desitjat (\texttt{is\_wanted}).
+		\item \textbf{Efectes}: Inclou els predecessors o continguts paral·lels a la llista de continguts desitjats.
+	\end{itemize}
+	
+	\subsubsection{set\_day\_unique}
+	Assigna un dia a un contingut que no té successors.
+	\begin{itemize}
+		\item \textbf{Precondicions}: El contingut és desitjat, no s'ha vist, no té successors ni paral·lels sense assignar, i el dia té espai disponible.
+		\item \textbf{Efectes}: Marca el contingut com a assignat i reserva el dia corresponent.
+	\end{itemize}
+	
+	\subsubsection{set\_day}
+	Assigna un dia a un contingut que pot tenir predecessors o paral·lels.
+	\begin{itemize}
+		\item \textbf{Precondicions}: El contingut és desitjat, compleix amb les relacions de predecessors i paral·lels, i el dia té espai disponible.
+		\item \textbf{Efectes}: Assigna el contingut al dia seleccionat, respectant les restriccions.
+	\end{itemize}
+	
+	\newpage
+	\section{Modelatge dels Problemes}
+	Els problemes específics es modelen com a instàncies del domini \textbf{Redflix}, definint els objectes, l'estat inicial i l'estat final.
+	
+	\subsection{Objectes}
+	Es defineixen els objectes com a continguts i dies. Per exemple:
+	\begin{verbatim}
+		(:objects
+		bb_s1 bb_s2 bb_s3 cc1 cc2 - content
+		day1 day2 day3 day4 - day
+		)
+	\end{verbatim}
+	
+	\subsection{Estat Inicial}
+	L'estat inicial descriu les relacions entre continguts i dies, incloent-hi:
+	\begin{itemize}
+		\item Continguts ja vistos.
+		\item Continguts que l'usuari vol veure.
+		\item Relacions de predecessors i paral·lels.
+		\item Relacions temporals entre els dies.
+	\end{itemize}
+	
+	Exemple:
+	\begin{verbatim}
+		(:init
+		(is_wanted bb_s3)
+		(watched bb_s1)
+		(watched bb_s2)
+		(predecessor bb_s1 bb_s2)
+		(predecessor bb_s2 bb_s3)
+		(parallel cc1 cc2)
+		(previous day1 day2)
+		(previous day2 day3)
+		)
+	\end{verbatim}
+	
+	\subsection{Estat Final}
+	L'estat objectiu especifica que tots els continguts desitjats han de ser assignats a dies, respectant les relacions de predecessors i paral·lels. Per exemple:
+	\begin{verbatim}
+		(:goal
+		(and
+		(day_to_watch bb_s3 day3)
+		(day_to_watch cc1 day2)
+		(day_to_watch cc2 day2)
+		)
+		)
+	\end{verbatim}
+	
+	\newpage
+	\section{Desenvolupament del Model}
+	El model s'ha desenvolupat iterativament, abordant les extensions de manera progressiva:
+	
+	\subsection{Nivell Bàsic}
+	Es va començar modelant continguts amb com a màxim un predecessor. Les accions no consideraven continguts paral·lels ni límits diaris.
+	
+	\subsection{Extensió 1}
+	Es van afegir múltiples predecessors al model. Es van validar les accions per assegurar que les dependències es respectaven.
+	
+	\subsection{Extensió 2}
+	Es van incorporar continguts paral·lels, garantint que es veien el mateix dia o en dies consecutius.
+	
+	\subsection{Extensió 3}
+	Es van afegir restriccions per limitar el nombre de continguts per dia a tres. Això es va aconseguir amb els predicats \texttt{assigned\_one}, \texttt{assigned\_two} i \texttt{assigned\_three}.
+	
+	\subsection{Extensió 4}
+	
+	
+	
+	******************* "Una breve explicación de como habéis desarrollado los modelos (de una sola vez, por iteraciones)" ----> no sé exactament què dir 
+	
+	
+	\newpage
+	\section{Jocs de prova}
+	**************El conjunto de problemas de prueba (mínimo 2 por extensión), explicando para cadauno que es lo que intentan probar y su resultado. Podéis partir de los juegos de pruebapara el nivel básico e ir añadiendo los elementos que cada extensión requiera. Si habéisimplementado el generador de problemas, al menos uno de los juegos de prueba de cadaextensión ha de ser obtenido de este.
+	
+	
+	\newpage
+	\section{Conclusió}
+	
+	
+
+\end{document}
