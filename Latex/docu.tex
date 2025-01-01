@@ -6,10 +6,42 @@
 \floatname{algorithm}{Algorisme} % Cambia "Algorithm" por "Algorisme"
 
 \usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{xcolor}
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{array}
+
+% Definició d'un estil per a PDDL
+\lstdefinelanguage{PDDL}{
+	keywords={:action, :parameters, :precondition, :effect, and, or, not, when, forall},
+	sensitive=true,
+	morecomment=[l]{;;},
+	morestring=[b]"
+}
+
+% Configuració de l'entorn listings
+\lstset{
+	language=PDDL,
+	basicstyle=\ttfamily\small,
+	keywordstyle=\color{blue}\bfseries,
+	commentstyle=\color{gray},
+	stringstyle=\color{teal},
+	numbers=left,
+	numberstyle=\tiny\color{gray},
+	stepnumber=1,
+	numbersep=5pt,
+	showspaces=false,
+	showstringspaces=false,
+	tabsize=2,
+	breaklines=true,
+	breakatwhitespace=true,
+	frame=lines,
+	captionpos=b
+}
+
+
 
 \title{\textbf{Intel·ligència Artificial:\\
 		Pràctica Planificació}}
@@ -30,64 +62,214 @@
 	\tableofcontents
 	\clearpage
 	
+	\section{Introducció}
 	
+	El problema plantejat consisteix en la creació d'una eina capaç de planificar el visionat de continguts audiovisuals per a un usuari, tenint en compte diversos factors com el catàleg de continguts disponibles, les dependències entre aquests, els continguts ja visionats i aquells que es volen veure. L'objectiu és generar un pla que distribueixi els continguts al llarg dels dies, complint amb restriccions com el respecte als predecedents i continguts paral·lels. \\
+	
+	La pràctica s'ha de desenvolupar amb el planificador \emph{Fast Forward} v2.3 i inclou diverses extensions que permeten incrementar la dificultat i el valor de l'activitat. Es posa especial èmfasi en la correcta modelització del domini i dels problemes, així com en la qualitat dels jocs de prova utilitzats. Finalment, la documentació i els resultats obtinguts seran avaluats en funció de la seva qualitat i adequació. \\
+	
+	La pràctica es centra en resoldre un problema de planificació utilitzant el llenguatge de descripció PDDL. El nivell bàsic del problema implica la generació d'un pla de visionat on cada contingut pot tenir com a màxim un contingut predecessor, i no existeixen continguts paral·lels. El planificador ha de garantir que els continguts es visionen en l'ordre correcte, respectant aquestes dependències senzilles. \\
+	
+	Les extensions incrementen la complexitat del problema afegint noves restriccions i funcionalitats:
+	\begin{itemize}
+		\item \textbf{Extensió 1:} Permet que un contingut tingui múltiples predecessors. El planificador ha de garantir que tots els predecessors es visionin abans del contingut corresponent.
+		\item \textbf{Extensió 2:} Incorpora continguts paral·lels, que es poden visionar el mateix dia o en dies consecutius. Això reflecteix les relacions complexes entre subtrames o universos compartits.
+		\item \textbf{Extensió 3:} Limita el nombre màxim de continguts a tres per dia, afegint restriccions al nombre d'activitats diàries.
+		\item \textbf{Extensió 4:} Afegeix una durada en minuts als continguts i estableix un límit màxim de 200 minuts per dia, requerint un control més precís dels recursos temporals.
+	\end{itemize}
+	
+	Aquestes extensions ofereixen als estudiants la possibilitat d'abordar reptes més avançats i de demostrar una comprensió més profunda de la planificació en espai d'estats, així com de millorar el seu domini del llenguatge PDDL. Cada extensió també es tradueix en un increment potencial de la nota màxima de la pràctica, incentivant el desenvolupament de solucions més completes i sofisticades.
+	
+	\newpage
 	\section{Modelatge del Domini}
-	El domini \textbf{Redflix} s'ha creat per capturar les dependències entre continguts audiovisuals (pel·lícules, capítols de sèries) i les restriccions associades amb la seva assignació a dies en un pla de visionat.
+	
+	El domini \textbf{REDFLIX} s'ha creat per capturar les dependències entre continguts audiovisuals (pel·lícules, capítols de sèries) i les restriccions associades amb la seva assignació a dies en un pla de visionat.
 	
 	\subsection{Variables}
-	S'han definit dos tipus principals:
+	
+	Les variables que representen el nostre domini son dues. Aquestes són:
+	
 	\begin{itemize}
 		\item \textbf{\texttt{content}}: Representa els continguts audiovisuals (capítols o pel·lícules).
 		\item \textbf{\texttt{day}}: Representa els dies disponibles per al pla de visionat.
 	\end{itemize}
 	
 	\subsection{Predicats}
-	Els predicats representen les relacions i restriccions entre els continguts i els dies i són la base per definir les precondicions i efectes de les accions. Són els següents:
+	
+	Els predicats representen les relacions i restriccions entre els continguts i els dies i són la base per definir les precondicions i efectes de les accions. Mostrarem primer els predicats del problema amb \textbf{Nivell senzill}. I a continuació afegirem els predicats conforme avancem per les diferents extensions.
 	
 	\begin{itemize}
 		\item \texttt{(watched ?c - content)}: Indica que un contingut \texttt{?c} ja s'ha vist.
 		\item \texttt{(is\_wanted ?c - content)}: Indica que l'usuari pot veure un contingut \texttt{?c}.
-		\item \texttt{(predecessor ?c2 - content ?c1 - content)}: Defineix que \texttt{?c1} s'ha de veure abans que \texttt{?c2}.
+		\item \texttt{(predecessor ?c1 - content ?c2 - content)}: Indica que el contingut \texttt{?c1} és predecessor de \texttt{?c2}. Per tant, \texttt{?c1} s'ha de veure abans que \texttt{?c2}.
 		\item \texttt{(day\_to\_watch ?c - content ?d - day)}: Assigna un contingut \texttt{?c} a un dia \texttt{?d}.
-		\item \texttt{(previous ?d1 - day ?d2 - day)}: Indica que \texttt{?d1} és el dia anterior a \texttt{?d2}.
-		\item \texttt{(parallel ?c1 - content ?c2 - content)}: Estableix que \texttt{?c1} i \texttt{?c2} són paral·lels i s'han de veure el mateix dia o en dies consecutius.
+		\item \texttt{(yesterday ?d1 - day ?d2 - day)}: Indica que \texttt{?d1} és el dia anterior a \texttt{?d2}.
 		\item \texttt{(assigned ?c - content)}: Marca que un contingut \texttt{?c} ja té un dia assignat.
-		\item \texttt{(assigned\_one ?d - day)}, \texttt{(assigned\_two ?d - day)}, \texttt{(assigned\_three ?d - day)}: Indiquen que s'han assignat un, dos o tres continguts a un dia \texttt{?d}.
 	\end{itemize}
 	
+	\noindent Siguin aquests els predicats del \textbf{Nivell bàsic}, ara ennumerarem els predicats de les altres extensions: \\
+	
+	\noindent \textbf{Extensió 1}: Els predicats romanen iguals, l'únic que canviarà serà la post condició quan s'assigni un contingut a un dia. \\
+	
+	\noindent \textbf{Extensió 2}: S'afegeix el predicat de contingut paral·lel (\texttt{parallel}).
+	
+	\begin{itemize}
+		\item \texttt{(parallel ?c1 - content ?c2 - content)}: Estableix que \texttt{?c1} és paral·lel amb \texttt{?c2} i s'han de veure el mateix dia o en dies consecutius. Hem assumit la relació paral·lel és unidireccional, però el nostre model permet que sigui bidireccional, si en el problema s'escriuen: \newline
+		\texttt{(parallel A B)} \newline
+		\texttt{(parallel B A)}
+	\end{itemize}
+	
+	\noindent \textbf{Extensió 3}: Apareixen tres predicats nous, cada un indicant quin dels tres continguts de cada dia han sigut ja assignats. Aquestes són:
+	
+	\begin{itemize}
+		\item \texttt{(assigned\_one ?d - day)}: S'ha assignat el primer contingut el dia \texttt{?d}.
+		\item \texttt{(assigned\_two ?d - day)}: S'ha assignat el segon contingut el dia \texttt{?d}.
+		\item \texttt{(assigned\_three ?d - day)}: S'ha assignat el tercer contingut el dia \texttt{?d}.
+	\end{itemize}
+	
+	\noindent \textbf{Extensió 4}: Els tres predicats de la extensió anterior són retirats. Tampoc s'afegeix cap predicat nou en aquesta extensió. En aquesta extensió es farà ús de fluents, s'explicarà a continuació.
+	
 	\subsection{Funcions}
+	
 	Les funcions introdueixen fluents per gestionar informació numèrica. Aquestes només es fan servir per l'Extensió 4:
 	
 	\begin{itemize}
-		\item \texttt{(total-days)}: Registra el nombre total de dies utilitzats. Necessari per optimitzar el pla.
+		\item \texttt{(total-days)}: Enregistra el nombre total de dies utilitzats. Necessari per optimitzar el pla.
 		\item \texttt{(duration ?c - content)}: Assigna la durada de cada contingut, modelant restriccions de temps.
-		\item \texttt{(day\_duration ?d - day)}: Registra la durada acumulada dels continguts assignats a un dia.
+		\item \texttt{(day\_duration ?d - day)}: Conté la durada acumulada dels continguts assignats a un dia.
 		\item \texttt{(remaining-content)}: Indica el nombre de continguts desitjats encara no assignats, permetent controlar l'avanç cap a l'objectiu.
 	\end{itemize}
 	
 	\subsection{Accions}
-	S'han definit tres accions principals per construir el pla de visionat:
 	
-	\subsubsection{add\_content}
-	Aquesta acció afegeix continguts relacionats a la llista de continguts que l'usuari vol veure.
+	En totes les extensions hem fet ús de tres accions. Per explicar-les farem una breu desprescripció del seu funcionament i explicarem les diferents iteracions que han tingut al llarg de les diferents extensions. Per simplificar, direm que tenim dos planificadors diferents, el de la \textbf{Extensió 3} i el de la \textbf{Extensió 4}, si les accions d'aquests dos planificadors son diferents, analitzarem en que canvien. \\
+	
+	Les 3 accions són les següents:
+	
+	\subsubsection*{add\_content}
+	
+	Aquesta acció afegeix continguts que l'usuari vol veure o que el sistema vol que l'usuari vegi.
+	
 	\begin{itemize}
 		\item \textbf{Precondicions}: El contingut no s'ha vist i és desitjat (\texttt{is\_wanted}).
 		\item \textbf{Efectes}: Inclou els predecessors o continguts paral·lels a la llista de continguts desitjats.
 	\end{itemize}
 	
-	\subsubsection{set\_day\_unique}
+	\begin{lstlisting}[language=PDDL, caption={Acció add\_content}, label={lst:add_content}]
+	(:action add_content
+		:parameters (?c - content)
+		:precondition (and 
+			(is_wanted ?c)
+			(not (watched ?c)))
+		:effect (and 
+		;; Si el contingut vist te un successor o algun contingut en parallel per veure i no ha estat vist, s'afegeix a la llista de continguts per veure
+			(forall (?c2 - content)
+				(when (and (or (predecessor ?c2 ?c) (parallel ?c2 ?c)) (not (watched ?c2)))
+					(is_wanted ?c2))
+	)))
+	\end{lstlisting}
+	
+	\subsubsection*{set\_day\_unique}
+	
 	Assigna un dia a un contingut que no té successors.
+	
 	\begin{itemize}
 		\item \textbf{Precondicions}: El contingut és desitjat, no s'ha vist, no té successors ni paral·lels sense assignar, i el dia té espai disponible.
 		\item \textbf{Efectes}: Marca el contingut com a assignat i reserva el dia corresponent.
 	\end{itemize}
 	
-	\subsubsection{set\_day}
+	\begin{lstlisting}[language=PDDL, caption={Acció set\_day\_unique}, label={lst:set_day_unique}]
+ 	(:action set_day_unique
+		:parameters (?c - content ?d - day)
+		:precondition (and 
+			(is_wanted ?c)
+			(not (watched ?c))
+			(or 
+				(not (assigned_one ?d))
+				(not (assigned_two ?d))
+				(not (assigned_three ?d)))
+			;; Verifica que no haya sucesores que no hayan sido vistos
+			(not (exists (?c2 - content) 
+				(and 
+					(predecessor ?c ?c2)
+					(not (watched ?c2)))))
+			;; Verifica que no haya contenidos paralelos que no hayan sido vistos
+			(not (exists (?c2 - content) 
+				(and 
+					(parallel ?c ?c2)
+					(not (watched ?c2))))))
+		:effect (and 
+			(day_to_watch ?c ?d)
+			(when (not (assigned_one ?d)) (assigned_one ?d))
+			(when (and (assigned_one ?d) (not (assigned_two ?d))) (assigned_two ?d))
+			(when (and (assigned_one ?d) (assigned_two ?d) (not (assigned_three ?d))) (assigned_three ?d))
+			(assigned ?c)
+	))
+	\end{lstlisting}
+	
+	\noindent Per l'\textbf{Extensió 2} s'afegeixen les línies que verifiquen que no hi hagi continguts paral·lels que no hagin sigut vistos. Després per l'\textbf{Extensió 3}, s'afegeixen les línies de la precondició \texttt{or} de \texttt{(not (assigned\_<number> ?d))}, i les de la postcondició també.. \\
+	
+	\noindent Per altra banda, l'\textbf{Extensió 4} elimina els canvis fets per la tercera extensió i afegeix a la precondició:
+	
+	\texttt{(<= (+ (day\_duration ?d) (duration ?c)) 200)}: s'assegura que el dia \texttt{?d} no se li assignin més de 200 minuts. \\
+	
+	\noindent També es modifica la postcondició, a la qual se li afegeixen les tres següents línies:
+	
+	\texttt{(increase (day\_duration ?d) (duration ?c))}: incrementa en duració de continguts visionats en el dia \texttt{?d} en duració de \texttt{?c} minuts de visionat.
+	
+	\texttt{(increase (total-days) 1)}: incrementa els dies usats.
+	
+	\texttt{(decrease (remaining-content)} 1): decrementa els continguts per veure
+	
+	
+	\subsubsection*{set\_day}
 	Assigna un dia a un contingut que pot tenir predecessors o paral·lels.
 	\begin{itemize}
 		\item \textbf{Precondicions}: El contingut és desitjat, compleix amb les relacions de predecessors i paral·lels, i el dia té espai disponible.
 		\item \textbf{Efectes}: Assigna el contingut al dia seleccionat, respectant les restriccions.
 	\end{itemize}
+	
+	\begin{lstlisting}[language=PDDL, caption={Acció set\_day}, label={lst:set_day}]
+	(:action set_day
+		:parameters (?c1 ?c2 - content ?d1 ?d2 - day)
+		:precondition (and 
+			(is_wanted ?c1)
+			(day_to_watch ?c2 ?d2)
+			(or 
+				(not (assigned_one ?d1))
+				(not (assigned_two ?d1))
+				(not (assigned_three ?d1)))
+			(or 
+				;condiciones para contenido paralelo
+				(and
+					(parallel ?c1 ?c2)
+					(or 
+						(previous ?d1 ?d2)
+						(= ?d1 ?d2)))
+				;condiciones para contenido predecessor
+				(and
+					(predecessor ?c1 ?c2)
+					(previous ?d1 ?d2))))
+		:effect (and 
+			(day_to_watch ?c1 ?d1)
+				(when (not (assigned_one ?d1)) (assigned_one ?d1))
+				(when (and (assigned_one ?d1) (not (assigned_two ?d1))) (assigned_two ?d1))
+				(when (and (assigned_one ?d1) (assigned_two ?d1) (not (assigned_three ?d1))) (assigned_three ?d1))
+				(assigned ?c1)
+	))
+	\end{lstlisting}
+	
+	\noindent Per l'\textbf{Extensió 2} s'afegeixen les línies amb la condició dels continguts paral·lels. Després per l'\textbf{Extensió 3}, s'afegeixen les línies de la precondició \texttt{or} de \texttt{(not (assigned\_<number> ?d))}, i les de la postcondició també. \\
+	
+	\noindent Els canvis de l'\textbf{Extensió 4} son idèntics als de l'acció anterior: eliminar els canvis de l'extensió 3 i afegir les línies a la precondició i postcondició: \\
+	
+	\texttt{(<= (+ (day\_duration ?d) (duration ?c)) 200)}: s'assegura que el dia \texttt{?d} no se li assignin més de 200 minuts. \\
+	
+	\texttt{(increase (day\_duration ?d) (duration ?c))}: incrementa en duració de continguts visionats en el dia \texttt{?d} en duració de \texttt{?c} minuts de visionat.
+	
+	\texttt{(increase (total-days) 1)}: incrementa els dies usats.
+	
+	\texttt{(decrease (remaining-content)} 1): decrementa els continguts per veure
 	
 	\newpage
 	\section{Modelatge dels Problemes}
@@ -120,8 +302,8 @@
 		(predecessor bb_s1 bb_s2)
 		(predecessor bb_s2 bb_s3)
 		(parallel cc1 cc2)
-		(previous day1 day2)
-		(previous day2 day3)
+		(yesterday day1 day2)
+		(yesterday day2 day3)
 		)
 	\end{verbatim}
 	
