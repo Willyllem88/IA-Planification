@@ -29,20 +29,10 @@
         (parallel aa3 bb_s5)
 
         ;; Dias anteriores
-        (previous day1 day2)
-        (previous day1 day3)
-        (previous day1 day4)
-        (previous day1 day5)
-
-        (previous day2 day3)
-        (previous day2 day4)
-        (previous day2 day5)
-
-        (previous day3 day4)
-        (previous day3 day5)
-
-        (previous day4 day5)
-
+        (yesterday day1 day2)
+        (yesterday day2 day3)
+        (yesterday day3 day4)
+        (yesterday day4 day5)
     )
 
     ;; Contenidos objetivo

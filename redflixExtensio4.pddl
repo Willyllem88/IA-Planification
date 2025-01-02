@@ -30,10 +30,13 @@
             (not (watched ?c))
         )
         :effect (and 
-            ;; Si el contenido visto tiene un sucesor o algun contenido en paralelo a ver, se agrega a la lista de contenidos por ver
+            ;; Si el contenido visto tiene un sucesor o algun contenido en paralelo a ver y no ha sido visto, se agrega a la lista de contenidos por ver
             (forall (?c2 - content)
-                (when (and (or (predecessor ?c2 ?c)(parallel ?c2 ?c))(not (is_wanted ?c2)) (not (watched ?c2)) )
-                    (is_wanted ?c2))   
+                (when (and 
+                    (or (predecessor ?c2 ?c)(parallel ?c2 ?c)) 
+                    (not (watched ?c2)) 
+                    (not) (is_wanted ?c2))
+                        (is_wanted ?c2))   
             )
         )
     )
@@ -47,8 +50,7 @@
             (not (assigned ?c))
             (<= (+ (day_duration ?d) (duration ?c)) 200) ; Verifica que no se pase de 200 minutos
             ;; Verifica que no haya sucesores  ni contenidos paralelos que no hayan sido vistos
-            (not (exists (?c2 - content) 
-                
+            (not (exists (?c2 - content)         
                 (and 
                     (or (predecessor ?c ?c2) (parallel ?c ?c2))
                     (not (watched ?c2))
@@ -71,29 +73,25 @@
             (is_wanted ?c1)
             (not (assigned ?c1)) ;asegura que no tiene un día asignado
             (<= (+ (day_duration ?d1) (duration ?c1)) 200) ; Verifica que no se pase de 200 minutos
-   
             (or 
                 ;condiciones para contenido paralelo
                 (and
-                (parallel ?c1 ?c2)
-                (day_to_watch ?c2 ?d2)
-                (or 
-                    (yesterday ?d1 ?d2)
-                    (= ?d1 ?d2)))
+                    (parallel ?c1 ?c2)
+                    (day_to_watch ?c2 ?d2)
+                    (or 
+                        (yesterday ?d1 ?d2)
+                        (= ?d1 ?d2)))
                 ;condiciones para contenido predecessor
                 (and
-                (predecessor ?c1 ?c2)
-                (day_to_watch ?c2 ?d2) 
-                (yesterday ?d1 ?d2)
-                )
-            )
-            
-        )
+                    (predecessor ?c1 ?c2)
+                    (day_to_watch ?c2 ?d2) 
+                    (yesterday ?d1 ?d2)
+        )))
         :effect (and 
             (day_to_watch ?c1 ?d1)
-            (increase (total-days) 1)
-            (increase (day_duration ?d1) (duration ?c1))           
             (assigned ?c1)
+            (increase (total-days) 1)
+            (increase (day_duration ?d1) (duration ?c1))                
             (decrease (remaining-content) 1) ; Decrementa contenidos por ver
         )
     )
