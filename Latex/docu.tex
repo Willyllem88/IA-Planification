@@ -287,46 +287,50 @@
 	Els problemes específics es modelen com a instàncies del domini \textbf{Redflix}, definint els objectes, l'estat inicial i l'estat final.
 	
 	\subsection{Objectes}
-	Es defineixen els objectes com a continguts i dies. Per exemple:
+	Els objectes representen els elements que intervenen en el problema, en aquest cas es defineixes dos tipus principals: continguts (representen els episodis, pel·lícules o capítols de la plataforma) i dies (que representen el temps per visionar els continguts). \\
+	Per exemple, si es vol modelar la visualització de cinc continguts durant cuatre dies, es definirien així:
 	\begin{verbatim}
 		(:objects
 		bb_s1 bb_s2 bb_s3 cc1 cc2 - content
 		day1 day2 day3 day4 - day
 		)
 	\end{verbatim}
+	Aquesta definició proporciona la base per establir les relacions i restriccions del problema, com ara les dependències entre continguts o la disponibilitat de dies.
 	
 	\subsection{Estat Inicial}
 	L'estat inicial descriu les relacions entre continguts i dies, incloent-hi:
 	\begin{itemize}
-		\item Continguts ja vistos.
-		\item Continguts que l'usuari vol veure.
-		\item Relacions de predecessors i paral·lels.
-		\item Relacions temporals entre els dies.
+		\item \texttt{Continguts ja vistos:} episodis que l'usuari ja ha visualitzat i no cal incloure en el pla. Representat amb el predicat \texttt{(watched ?c - content)}.
+		\item \texttt{Continguts que l'usuari vol veure:} Llista dels continguts que l'usuari pot veure. Representat amb el predicat \texttt{(is\_wanted ?c - content)}.
+		\item \texttt{Relacions de predecessors i paral·lels:} Predecessors que han de ser vistos abans d’un altre contingut i continguts paral·lels que poden ser vistos el mateix dia. Representat amb el predicat \texttt{(predecessor ?c1 - content ?c2 - content)}.
+		\item \texttt{Relacions temporals entre els dies:} Ordre cronològic dels dies disponibles. Representat amb el predicat \texttt{(yesterday ?d1 - day ?d2 - day)}.
 	\end{itemize}
 	
-	Exemple:
+	Un exemple d'inicialització és el següent:
 	\begin{verbatim}
 		(:init
-		(is_wanted bb_s3)
-		(watched bb_s1)
-		(watched bb_s2)
-		(predecessor bb_s1 bb_s2)
-		(predecessor bb_s2 bb_s3)
-		(parallel cc1 cc2)
-		(yesterday day1 day2)
-		(yesterday day2 day3)
+			(is_wanted bb_s3)
+			(watched bb_s1)
+			(watched bb_s2)
+			(predecessor bb_s1 bb_s2)
+			(predecessor bb_s2 bb_s3)
+			(parallel cc1 cc2)
+			(yesterday day1 day2)
+			(yesterday day2 day3)
 		)
 	\end{verbatim}
 	
 	\subsection{Estat Final}
-	L'estat objectiu especifica que tots els continguts desitjats han de ser assignats a dies, respectant les relacions de predecessors i paral·lels. Per exemple:
+	L'estat objectiu s’ha d’assegurar que els continguts estan assignats a dies concrets dins de les limitacions del problema: (continguts predecessors, paral·lels, etc.).
+	
+	Exemple d’estat final:
 	\begin{verbatim}
 		(:goal
-		(and
-		(day_to_watch bb_s3 day3)
-		(day_to_watch cc1 day2)
-		(day_to_watch cc2 day2)
-		)
+			(and
+			(day_to_watch bb_s3 day3)
+			(day_to_watch cc1 day2)
+			(day_to_watch cc2 day2)
+			)
 		)
 	\end{verbatim}
 	
@@ -351,7 +355,39 @@
 	\end{lstlisting}
 	
 	\subsection{Extensió 2}
-	Es van incorporar continguts paral·lels, garantint que es veien el mateix dia o en dies consecutius.
+	
+	A l'extensió 2, es va introduir la capacitat de modelar continguts paral·lels, permetent que alguns continguts es puguin veure el mateix dia o en dies consecutius. Aquesta característica va requerir l'addició del predicat \texttt{parallel} per definir la relació entre continguts paral·lels i noves restriccions a les accions d'assignació de dies (\texttt{set\_day} i \texttt{set\_day\_unique}).\\
+	
+	Es va afegir el predicat \texttt{parallel}, que indica si dos continguts es consideren paral·lels:
+	\begin{lstlisting}[language=PDDL, caption={Definició del predicat \texttt{parallel}}, label={lst:predicatParallel}]
+		(:predicates
+			(parallel ?c1 - content ?c2 - content)
+		)
+	\end{lstlisting}
+	
+	Les accions d'assignació de dies es van modificar per assegurar que, si dos continguts són paral·lels, aquests es programin el mateix dia o en dies consecutius. Aquesta restricció es va afegir a les precondicions de les accions, com es mostra a continuació:
+	
+	\begin{lstlisting}[language=PDDL, caption={Restriccions per continguts paral·lels}, label={lst:extensio2}]
+		;; PRECONDICIO
+		(or
+		(and 	(parallel ?c1 ?c2)
+			 	(day_to_watch ?c2 ?d2)
+			 	(or
+					(yesterday ?d ?d2)
+					(= ?d ?d2)))
+		)
+	\end{lstlisting}
+	
+	Per acabar, al fitxer problema, es va afegir la informació sobre les relacions de paral·lelisme entre continguts, així com la relació temporal entre dies. Per exemple:
+	\begin{lstlisting}[language=PDDL, caption={Inicialització de paral·lels i dies consecutius}, label={lst:iniExtensio2}]
+		(:init
+			(parallel cc1 cc2)
+			(yesterday day1 day2)
+			(yesterday day2 day3)
+		)
+	\end{lstlisting}
+	
+
 	
 	\subsection{Extensió 3}
 	Es van afegir restriccions per limitar el nombre de continguts per dia a tres. Això es va aconseguir amb els predicats \texttt{assigned\_one}, \texttt{assigned\_two} i \texttt{assigned\_three}. En les precondicions d'assignar un dia, tant en \texttt{set\_day} com a \texttt{set\_day\_unique} s'afegeixen les següents linies: \\
@@ -375,9 +411,49 @@
 
 	\subsection{Extensió 4}
 	
+	A l'extensió 4, es va haver d'incorporar una nova característica al domini per gestionar la duració dels continguts i assegurar que no es superessin els 200 minuts de visualització per dia. Aquesta funcionalitat es va implementar utilitzant una funció \texttt{day\_duration} que acumula els minuts assignats a cada dia, així com la duració específica de cada contingut mitjançant la funció \texttt{duration}.
+	
+	Per a controlar la limitació de minuts per dia, es van modificar les precondicions i els efectes de les accions d'assignació de dies (\texttt{set\_day} i \texttt{set\_day\_unique}). Es va assegurar que només es poguessin assignar continguts a un dia si la seva duració, sumada a la duració acumulada d'aquell dia, no superava els 200 minuts.
+	
+	\begin{lstlisting}[language=PDDL, caption={Restriccions per controlar el límit de 200 minuts per dia}, label={lst:extensio4}]
+		;; PRECONDICIO
+		(<= (+ (day_duration ?d) (duration ?c)) 200)
+		
+		;; POSTCONDICIO
+		(increase (day_duration ?d) (duration ?c))
+	\end{lstlisting}
+	
+	Aquestes línies garanteixen que:
+	\begin{itemize}
+		\item A la precondició, es comprova que el contingut \texttt{?c} es pugui afegir al dia \texttt{?d} sense superar el límit de 200 minuts.
+		\item A la postcondició, un cop assignat, la funció \texttt{day\_duration} s'actualitza sumant la duració del contingut \texttt{?c} al total acumulat.
+	\end{itemize}
+	
+	També es va definir la funció \texttt{duration} per a cada contingut i es va afegir la funció \texttt{day\_duration} per emmagatzemar la suma total de minuts assignats a cada dia:
+	\begin{lstlisting}[language=PDDL, caption={Funcions per l'extensió 4}, label={lst:funcionsExtensio4}]
+			(:functions
+				(duration ?c - content)
+				(day_duration ?d - day)
+			)
+	\end{lstlisting}
+	
+	Es va afegir al fitxer problema la duració de cada contingut, així com la inicialització dels valors de \texttt{day\_duration} a 0, que guardaran posteriorment el total acumulat. Per exemple:
+	\begin{lstlisting}[language=PDDL, caption={Novetats en la inicialització per l'extensió 4}, label={lst:iniExtensio4}]
+			(:init
+				(= (duration bb_s1) 45)
+				(= (duration bb_s2) 50)
+				(= (duration bb_s3) 60)
+				(= (duration cc1) 30)
+				(= (duration cc2) 25)
+				
+				(= (day_duration day1) 0)
+				(= (day_duration day2) 0)
+				(= (day_duration day3) 0)
+			)
+	\end{lstlisting}
 	
 	
-	******************* "Una breve explicación de como habéis desarrollado los modelos (de una sola vez, por iteraciones)" ----> no sé exactament què dir 
+	
 	
 	
 	\newpage
@@ -399,8 +475,36 @@
 	\newpage
 	\section{Conclusió}
 	
+	El desenvolupament d'aquest projecte ens ha proporcionat una oportunitat per posar en pràctica els coneixements adquirits sobre planificació automàtica i modelatge mitjançant PDDL. Hem pogut aplicar de manera progressiva els conceptes teòrics apresos per finalment desenvolupar un sistema funcional que compleix els requisits establerts.\\ 
+	
+	El treball ha estat un repte significatiu, sobretot a l'hora d'implementar les diferents extensions i garantir que totes les funcionalitats fossin compatibles. A través d'aquest procés, hem millorat la nostra comprensió dels sistemes de planificació.
+	
+	
 	\subsection{Coneixements adquirits}
 	
+	Aquest projecte ens ha permès aprofundir en diversos aspectes relacionats amb la planificació, com ara:
+	\begin{itemize}
+		\item La definició de dominis i problemes mitjançant PDDL, amb una comprensió clara de com estructurar accions, precondicions i efectes.
+		\item L'ús de predicats, funcions i restriccions per modelar situacions reals de manera precisa i eficient.
+		\item La importància de modularitzar el desenvolupament per incorporar funcionalitats progressivament sense perdre consistència.
+		\item L'ús de planificadors automàtics per resoldre problemes amb limitacions complexes i obtenir solucions viables.
+	\end{itemize}
+	
+	També hem après a analitzar els resultats obtinguts i a identificar possibles limitacions, fet que ens ha ajudat a entendre millor les capacitats i les limitacions dels sistemes de planificació.
+	
+	
 	\subsection{Possibles millores}	
+
+	Tot i que hem assolit els objectius establerts, creiem que aquest projecte es podria millorar en diversos aspectes:
+	\begin{itemize}
+		\item \textbf{Major flexibilitat}: Introduir més opcions per als usuaris, com ara prioritzar continguts o ajustar limitacions personalitzades.
+		\item \textbf{Eines de depuració}: Incorporar mecanismes per visualitzar més fàcilment les relacions entre continguts i els plans generats.
+		\item \textbf{Anàlisi posteriors}: Afegir funcionalitats que permetin analitzar plans generats i obtenir estadístiques sobre la seva eficiència o sobre el compliment de les preferències.
+		\item \textbf{Adaptació a altres contexts}: Explorar com aquest model es podria adaptar a altres escenaris, com la planificació de tasques personals o professionals.
+	\end{itemize}
+	
+	En resum, aquest projecte ha estat una experiència enriquidora que ens ha ajudat a consolidar els nostres coneixements i a desenvolupar habilitats pràctiques en l'àmbit de la planificació automàtica.
+
+
 
 \end{document}
