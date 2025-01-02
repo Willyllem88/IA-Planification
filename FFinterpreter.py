@@ -103,7 +103,7 @@ if __name__ == '__main__':
     elif decision == 1:
         create = input("Do you want to generate new random problem? (n/y): ")
         if create == "y":
-            subprocess.run(["python", "ExamplesGenerator.py"])
+            subprocess.run(["python3", "ExamplesGenerator.py"])
         choice = int(input("Choose a random problem to solve (1-5): "))
         redflix = f'./random_problems/problem_{choice}.pddl'
         print(redflix)
