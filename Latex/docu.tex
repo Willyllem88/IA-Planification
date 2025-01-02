@@ -6,6 +6,7 @@
 \floatname{algorithm}{Algorisme} % Cambia "Algorithm" por "Algorisme"
 
 \usepackage{algpseudocode}
+\usepackage{enumitem}
 \usepackage{listings}
 \usepackage{xcolor}
 \usepackage{hyperref}
@@ -156,6 +157,7 @@
 	\end{itemize}
 	
 	\begin{lstlisting}[language=PDDL, caption={Acció add\_content}, label={lst:add_content}]
+	;; Anade un contenido al plan sin visionado
 	(:action add_content
 		:parameters (?c - content)
 		:precondition (and 
@@ -164,8 +166,10 @@
 		:effect (and 
 		;; Si el contingut vist te un successor o algun contingut en parallel per veure i no ha estat vist, s'afegeix a la llista de continguts per veure
 			(forall (?c2 - content)
-				(when (and (or (predecessor ?c2 ?c) (parallel ?c2 ?c)) (not (watched ?c2)))
-					(is_wanted ?c2))
+				(when (and (or (predecessor ?c2 ?c)(parallel ?c2 ?c))
+					(not (watched ?c2)) (not (is_wanted ?c2)))
+						(is_wanted ?c2)
+				)		
 	)))
 	\end{lstlisting}
 	
@@ -179,6 +183,7 @@
 	\end{itemize}
 	
 	\begin{lstlisting}[language=PDDL, caption={Acció set\_day\_unique}, label={lst:set_day_unique}]
+	;; Establece un dia a un contenido del plan de visionado si este no es predecesor ni paralelo de otros.
  	(:action set_day_unique
 		:parameters (?c - content ?d - day)
 		:precondition (and 
@@ -200,10 +205,10 @@
 					(not (watched ?c2))))))
 		:effect (and 
 			(day_to_watch ?c ?d)
+			(assigned ?c)
 			(when (not (assigned_one ?d)) (assigned_one ?d))
 			(when (and (assigned_one ?d) (not (assigned_two ?d))) (assigned_two ?d))
 			(when (and (assigned_one ?d) (assigned_two ?d) (not (assigned_three ?d))) (assigned_three ?d))
-			(assigned ?c)
 	))
 	\end{lstlisting}
 	
@@ -211,16 +216,19 @@
 	
 	\noindent Per altra banda, l'\textbf{Extensió 4} elimina els canvis fets per la tercera extensió i afegeix a la precondició:
 	
-	\texttt{(<= (+ (day\_duration ?d) (duration ?c)) 200)}: s'assegura que el dia \texttt{?d} no se li assignin més de 200 minuts. \\
+	\begin{itemize}[label={}, leftmargin=1.5em, itemsep=0pt]
+		\item \texttt{(<= (+ (day\_duration ?d) (duration ?c)) 200)}: s'assegura que el dia \texttt{?d} no se li assignin més de 200 minuts. \\
+	\end{itemize}
 	
 	\noindent També es modifica la postcondició, a la qual se li afegeixen les tres següents línies:
 	
-	\texttt{(increase (day\_duration ?d) (duration ?c))}: incrementa en duració de continguts visionats en el dia \texttt{?d} en duració de \texttt{?c} minuts de visionat.
-	
-	\texttt{(increase (total-days) 1)}: incrementa els dies usats.
-	
-	\texttt{(decrease (remaining-content)} 1): decrementa els continguts per veure
-	
+	\begin{itemize}[label={}, leftmargin=1.5em, itemsep=0pt]
+		\item \texttt{(increase (day\_duration ?d) (duration ?c))}: incrementa en duració de continguts visionats en el dia \texttt{?d} en duració de \texttt{?c} minuts de visionat.
+		
+		\item \texttt{(increase (total-days) 1)}: incrementa els dies usats.
+		
+		\item \texttt{(decrease (remaining-content)} 1): decrementa els continguts per veure
+	\end{itemize}
 	
 	\subsubsection*{set\_day}
 	Assigna un dia a un contingut que pot tenir predecessors o paral·lels.
@@ -230,6 +238,7 @@
 	\end{itemize}
 	
 	\begin{lstlisting}[language=PDDL, caption={Acció set\_day}, label={lst:set_day}]
+	;; Establece un dia a un contenido del plan de visionado si este es predecesor o paralelo. El contenido al que se le asignara un dia es el ?c1 y el dia del asignado es ?d1. ?c2 y ?d2 son el contenido y dia del sucesor o paralelo del contenido que vamos a asignarle un dia.
 	(:action set_day
 		:parameters (?c1 ?c2 - content ?d1 ?d2 - day)
 		:precondition (and 
@@ -252,24 +261,26 @@
 					(previous ?d1 ?d2))))
 		:effect (and 
 			(day_to_watch ?c1 ?d1)
-				(when (not (assigned_one ?d1)) (assigned_one ?d1))
-				(when (and (assigned_one ?d1) (not (assigned_two ?d1))) (assigned_two ?d1))
-				(when (and (assigned_one ?d1) (assigned_two ?d1) (not (assigned_three ?d1))) (assigned_three ?d1))
-				(assigned ?c1)
+			(assigned ?c1)
+			(when (not (assigned_one ?d1)) (assigned_one ?d1))
+			(when (and (assigned_one ?d1) (not (assigned_two ?d1))) (assigned_two ?d1))
+			(when (and (assigned_one ?d1) (assigned_two ?d1) (not (assigned_three ?d1))) (assigned_three ?d1))
 	))
 	\end{lstlisting}
 	
 	\noindent Per l'\textbf{Extensió 2} s'afegeixen les línies amb la condició dels continguts paral·lels. Després per l'\textbf{Extensió 3}, s'afegeixen les línies de la precondició \texttt{or} de \texttt{(not (assigned\_<number> ?d))}, i les de la postcondició també. \\
 	
-	\noindent Els canvis de l'\textbf{Extensió 4} son idèntics als de l'acció anterior: eliminar els canvis de l'extensió 3 i afegir les línies a la precondició i postcondició: \\
+	\noindent Els canvis de l'\textbf{Extensió 4} son idèntics als de l'acció anterior: eliminar els canvis de l'extensió 3 i afegir les línies a la precondició i postcondició:
 	
-	\texttt{(<= (+ (day\_duration ?d) (duration ?c)) 200)}: s'assegura que el dia \texttt{?d} no se li assignin més de 200 minuts. \\
-	
-	\texttt{(increase (day\_duration ?d) (duration ?c))}: incrementa en duració de continguts visionats en el dia \texttt{?d} en duració de \texttt{?c} minuts de visionat.
-	
-	\texttt{(increase (total-days) 1)}: incrementa els dies usats.
-	
-	\texttt{(decrease (remaining-content)} 1): decrementa els continguts per veure
+	\begin{itemize}[label={}, leftmargin=1.5em, itemsep=0pt]
+		\item \texttt{(<= (+ (day\_duration ?d) (duration ?c)) 200)}: s'assegura que el dia \texttt{?d} no se li assignin més de 200 minuts. \\
+		
+		\item \texttt{(increase (day\_duration ?d) (duration ?c))}: incrementa en duració de continguts visionats en el dia \texttt{?d} en duració de \texttt{?c} minuts de visionat.
+		
+		\item \texttt{(increase (total-days) 1)}: incrementa els dies usats.
+		
+		\item \texttt{(decrease (remaining-content)} 1): decrementa els continguts per veure
+	\end{itemize}
 	
 	\newpage
 	\section{Modelatge dels Problemes}
@@ -321,20 +332,47 @@
 	
 	\newpage
 	\section{Desenvolupament del Model}
-	El model s'ha desenvolupat iterativament, abordant les extensions de manera progressiva:
+	
+	El model s'ha desenvolupat iterativament, abordant les extensions de manera progressiva. Els canvis de cada versió ja s'han anat explicant en els apartats anteriors en més detalls per cada subsecció. Aquí enumerarem i donarem més detalls sobre els cavis que no s'hagin acabat d'explicar en els apartats anteriors.
 	
 	\subsection{Nivell Bàsic}
-	Es va començar modelant continguts amb com a màxim un predecessor. Les accions no consideraven continguts paral·lels ni límits diaris.
+	Es va començar modelant continguts que tinguessin com a màxim un predecessor. Les accions no consideraven continguts paral·lels ni límits diaris.
 	
 	\subsection{Extensió 1}
-	Es van afegir múltiples predecessors al model. Es van validar les accions per assegurar que les dependències es respectaven.
+	
+	Tal i com vam plantejar el \textbf{Nivell Bàsic}, no vam fer canvis en aquesta extensió. L'únic canvi, per així dir-ho va ser en el fitxer del problema. El nivell bàsic ja tenia el fragment de codi del següent listing (\ref{lst:extensio1}). Per tant el problema del Nivell Bàsic tenia cadenes de predecessors que formaven un camí (entenent-ho com en teoria de grafs, on els nodes son continguts i les arestes marquen els predecesors), i la extensió 1 ho gestiona com a arbres on cada node pot tenir més d'un predecessor. \\
+	
+	\begin{lstlisting}[language=PDDL, caption={Fragment per assignar més d'un predecessor com a pendent de veure}, label={lst:extensio1}]
+	(forall (?c2 - content)
+		(when ((predecessor ?c2 ?c))
+			(is_wanted ?c2)
+		)
+	)
+	\end{lstlisting}
 	
 	\subsection{Extensió 2}
 	Es van incorporar continguts paral·lels, garantint que es veien el mateix dia o en dies consecutius.
 	
 	\subsection{Extensió 3}
-	Es van afegir restriccions per limitar el nombre de continguts per dia a tres. Això es va aconseguir amb els predicats \texttt{assigned\_one}, \texttt{assigned\_two} i \texttt{assigned\_three}.
+	Es van afegir restriccions per limitar el nombre de continguts per dia a tres. Això es va aconseguir amb els predicats \texttt{assigned\_one}, \texttt{assigned\_two} i \texttt{assigned\_three}. En les precondicions d'assignar un dia, tant en \texttt{set\_day} com a \texttt{set\_day\_unique} s'afegeixen les següents linies: \\
 	
+	\begin{lstlisting}[language=PDDL, caption={Fragment per limitar a 3 els continguts per dia}, label={lst:extensio3}]
+	;; PRECONDICIO	
+	(or 
+		(not (assigned_one ?d))
+		(not (assigned_two ?d))
+		(not (assigned_three ?d))
+	)
+	;; POSTCONDICIO
+	(when (not (assigned_one ?d)) (assigned_one ?d))
+	(when (and (assigned_one ?d) (not (assigned_two ?d))) (assigned_two ?d))
+	(when (and (assigned_one ?d) (assigned_two ?d) (not (assigned_three ?d))) (assigned_three ?d))
+	\end{lstlisting}
+	
+	A la precondició es valida que pel dia \texttt{?d} hi hagi algun \textit{slot} disponible. I a la postcondició, s'assigna al primer \textit{slot} disponible el contingut \texttt{?c}. \\
+	
+	El fitxer problema no es va veure modificat perquè per defecte, els nous predicats han d'estar marcats com a no-assignats. Ja que el programa PDDL serà el que vagi assignant-los un per un.
+
 	\subsection{Extensió 4}
 	
 	
@@ -346,10 +384,23 @@
 	\section{Jocs de prova}
 	**************El conjunto de problemas de prueba (mínimo 2 por extensión), explicando para cadauno que es lo que intentan probar y su resultado. Podéis partir de los juegos de pruebapara el nivel básico e ir añadiendo los elementos que cada extensión requiera. Si habéisimplementado el generador de problemas, al menos uno de los juegos de prueba de cadaextensión ha de ser obtenido de este.
 	
+	\subsection{Nivell Bàsic}
+	
+	\subsection{Extensió 1}
+	
+	\subsection{Extensió 2}
+	
+	\subsection{Extensió 3}
+	
+	\subsection{Extensió 4}
+	
+	\subsection{Generador de problemes}	
 	
 	\newpage
 	\section{Conclusió}
 	
+	\subsection{Coneixements adquirits}
 	
+	\subsection{Possibles millores}	
 
 \end{document}
