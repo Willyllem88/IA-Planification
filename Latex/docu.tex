@@ -232,6 +232,7 @@
 	
 	\subsubsection*{set\_day}
 	Assigna un dia a un contingut que pot tenir predecessors o paral·lels.
+	
 	\begin{itemize}
 		\item \textbf{Precondicions}: El contingut és desitjat, compleix amb les relacions de predecessors i paral·lels, i el dia té espai disponible.
 		\item \textbf{Efectes}: Assigna el contingut al dia seleccionat, respectant les restriccions.
@@ -284,21 +285,28 @@
 	
 	\newpage
 	\section{Modelatge dels Problemes}
+	
 	Els problemes específics es modelen com a instàncies del domini \textbf{Redflix}, definint els objectes, l'estat inicial i l'estat final.
 	
 	\subsection{Objectes}
+	
 	Els objectes representen els elements que intervenen en el problema, en aquest cas es defineixes dos tipus principals: continguts (representen els episodis, pel·lícules o capítols de la plataforma) i dies (que representen el temps per visionar els continguts). \\
+	
 	Per exemple, si es vol modelar la visualització de cinc continguts durant cuatre dies, es definirien així:
-	\begin{verbatim}
-		(:objects
-		bb_s1 bb_s2 bb_s3 cc1 cc2 - content
-		day1 day2 day3 day4 - day
-		)
-	\end{verbatim}
+	
+	\begin{lstlisting}[language=PDDL, caption={Definició d'objectes}, label={lst:def_objectes}]
+	(:objects
+		bb_s1 bb_s2 bb_s3 cc1 cc2 - content ;; Continguts disponibles
+		day1 day2 day3 day4 day5- day ;; Dies assignables
+	)
+	\end{lstlisting}
+	
 	Aquesta definició proporciona la base per establir les relacions i restriccions del problema, com ara les dependències entre continguts o la disponibilitat de dies.
 	
 	\subsection{Estat Inicial}
+	
 	L'estat inicial descriu les relacions entre continguts i dies, incloent-hi:
+	
 	\begin{itemize}
 		\item \texttt{Continguts ja vistos:} episodis que l'usuari ja ha visualitzat i no cal incloure en el pla. Representat amb el predicat \texttt{(watched ?c - content)}.
 		\item \texttt{Continguts que l'usuari vol veure:} Llista dels continguts que l'usuari pot veure. Representat amb el predicat \texttt{(is\_wanted ?c - content)}.
@@ -307,32 +315,34 @@
 	\end{itemize}
 	
 	Un exemple d'inicialització és el següent:
-	\begin{verbatim}
-		(:init
-			(is_wanted bb_s3)
-			(watched bb_s1)
-			(watched bb_s2)
-			(predecessor bb_s1 bb_s2)
-			(predecessor bb_s2 bb_s3)
-			(parallel cc1 cc2)
-			(yesterday day1 day2)
-			(yesterday day2 day3)
-		)
-	\end{verbatim}
+	
+	\begin{lstlisting}[language=PDDL, caption={Exemple d'inicialització del problema}, label={lst:ini_problema}]
+	(:init
+		(is_wanted bb_s3) ;; L'usuari vol visiionar bb_s3
+		(watched bb_s1) ;; L'usuari ha vist bb_s1
+		(watched bb_s2) ;; L'usuari ha vist bb_s2
+		(predecessor bb_s1 bb_s2) ;; bb_s1 es predecesor de bb_s2
+		(predecessor bb_s2 bb_s3) ;; bb_s2 es predecesor de bb_s3
+		(parallel cc1 cc2) ;; cc1 es un contingut parallel de cc2
+		(yesterday day1 day2) ;; day1 es anterior a day2
+		(yesterday day2 day3) ;; day2 es anterior a day3
+	)
+	\end{lstlisting}
 	
 	\subsection{Estat Final}
+	
 	L'estat objectiu s’ha d’assegurar que els continguts estan assignats a dies concrets dins de les limitacions del problema: (continguts predecessors, paral·lels, etc.).
 	
 	Exemple d’estat final:
-	\begin{verbatim}
-		(:goal
-			(and
-			(day_to_watch bb_s3 day3)
-			(day_to_watch cc1 day2)
-			(day_to_watch cc2 day2)
-			)
-		)
-	\end{verbatim}
+	
+	\begin{lstlisting}[language=PDDL, caption={Exemple de \textit{goal} del problema}, label={lst:goal_problema}]
+	(:goal
+		(and
+		(day_to_watch bb_s3 day3) ;; bb_s3 es vol que es visualitzi el dia 3
+		(day_to_watch cc1 day2) ;; cc1 el dia 2
+		(day_to_watch cc2 day2) ;; c2 tambe el dia 2
+	))
+	\end{lstlisting}
 	
 	\newpage
 	\section{Desenvolupament del Model}
@@ -340,6 +350,7 @@
 	El model s'ha desenvolupat iterativament, abordant les extensions de manera progressiva. Els canvis de cada versió ja s'han anat explicant en els apartats anteriors en més detalls per cada subsecció. Aquí enumerarem i donarem més detalls sobre els cavis que no s'hagin acabat d'explicar en els apartats anteriors.
 	
 	\subsection{Nivell Bàsic}
+	
 	Es va començar modelant continguts que tinguessin com a màxim un predecessor. Les accions no consideraven continguts paral·lels ni límits diaris.
 	
 	\subsection{Extensió 1}
@@ -360,31 +371,31 @@
 	
 	Es va afegir el predicat \texttt{parallel}, que indica si dos continguts es consideren paral·lels:
 	\begin{lstlisting}[language=PDDL, caption={Definició del predicat \texttt{parallel}}, label={lst:predicatParallel}]
-		(:predicates
-			(parallel ?c1 - content ?c2 - content)
-		)
+	(:predicates
+		(parallel ?c1 - content ?c2 - content)
+	)
 	\end{lstlisting}
 	
 	Les accions d'assignació de dies es van modificar per assegurar que, si dos continguts són paral·lels, aquests es programin el mateix dia o en dies consecutius. Aquesta restricció es va afegir a les precondicions de les accions, com es mostra a continuació:
 	
 	\begin{lstlisting}[language=PDDL, caption={Restriccions per continguts paral·lels}, label={lst:extensio2}]
-		;; PRECONDICIO
-		(or
-		(and 	(parallel ?c1 ?c2)
-			 	(day_to_watch ?c2 ?d2)
-			 	(or
-					(yesterday ?d ?d2)
-					(= ?d ?d2)))
-		)
+	;; PRECONDICIO
+	(or
+	(and 	(parallel ?c1 ?c2)
+		 	(day_to_watch ?c2 ?d2)
+		 	(or
+				(yesterday ?d ?d2)
+				(= ?d ?d2)))
+	)
 	\end{lstlisting}
 	
 	Per acabar, al fitxer problema, es va afegir la informació sobre les relacions de paral·lelisme entre continguts, així com la relació temporal entre dies. Per exemple:
 	\begin{lstlisting}[language=PDDL, caption={Inicialització de paral·lels i dies consecutius}, label={lst:iniExtensio2}]
-		(:init
-			(parallel cc1 cc2)
-			(yesterday day1 day2)
-			(yesterday day2 day3)
-		)
+	(:init
+		(parallel cc1 cc2)
+		(yesterday day1 day2)
+		(yesterday day2 day3)
+	)
 	\end{lstlisting}
 	
 
@@ -431,30 +442,26 @@
 	
 	També es va definir la funció \texttt{duration} per a cada contingut i es va afegir la funció \texttt{day\_duration} per emmagatzemar la suma total de minuts assignats a cada dia:
 	\begin{lstlisting}[language=PDDL, caption={Funcions per l'extensió 4}, label={lst:funcionsExtensio4}]
-			(:functions
-				(duration ?c - content)
-				(day_duration ?d - day)
-			)
+	(:functions
+		(duration ?c - content)
+		(day_duration ?d - day)
+	)
 	\end{lstlisting}
 	
 	Es va afegir al fitxer problema la duració de cada contingut, així com la inicialització dels valors de \texttt{day\_duration} a 0, que guardaran posteriorment el total acumulat. Per exemple:
 	\begin{lstlisting}[language=PDDL, caption={Novetats en la inicialització per l'extensió 4}, label={lst:iniExtensio4}]
-			(:init
-				(= (duration bb_s1) 45)
-				(= (duration bb_s2) 50)
-				(= (duration bb_s3) 60)
-				(= (duration cc1) 30)
-				(= (duration cc2) 25)
-				
-				(= (day_duration day1) 0)
-				(= (day_duration day2) 0)
-				(= (day_duration day3) 0)
-			)
+	(:init
+		(= (duration bb_s1) 45)
+		(= (duration bb_s2) 50)
+		(= (duration bb_s3) 60)
+		(= (duration cc1) 30)
+		(= (duration cc2) 25)
+		
+		(= (day_duration day1) 0)
+		(= (day_duration day2) 0)
+		(= (day_duration day3) 0)
+	)
 	\end{lstlisting}
-	
-	
-	
-	
 	
 	\newpage
 	\section{Jocs de prova}
@@ -503,8 +510,79 @@
 		\item \textbf{Adaptació a altres contexts}: Explorar com aquest model es podria adaptar a altres escenaris, com la planificació de tasques personals o professionals.
 	\end{itemize}
 	
-	En resum, aquest projecte ha estat una experiència enriquidora que ens ha ajudat a consolidar els nostres coneixements i a desenvolupar habilitats pràctiques en l'àmbit de la planificació automàtica.
-
-
+	En resum, aquest projecte ha estat una experiència enriquidora que ens ha ajudat a consolidar els nostres coneixements i a desenvolupar habilitats pràctiques en l'àmbit de la planificació automàtica.	
+	
+	\newpage
+	\appendix
+	\section{Annexos}
+	
+	\subsection{Especificació del domini en PDDL}
+	
+	A continuació, es mostra l'especificació completa del domini utilitzat en aquest projecte:
+	
+	\begin{lstlisting}[language=PDDL, caption={Especificació del domini en PDDL}, label={lst:dominiPDDL}]
+	(define (domain example-domain)
+		(:predicates
+			(on ?x ?y) ;; Descripcio del predicat
+			...
+		)
+		(:action move
+			:parameters (?x ?y)
+			:precondition (and (clear ?y) (on ?x table))
+			:effect (and (not (on ?x table)) (on ?x ?y))
+		)
+	)
+	\end{lstlisting}
+	
+	\subsection{Especificació del problema en PDDL}
+	Aquí s'inclou la descripció del problema utilitzat per validar el domini:
+	
+	\begin{lstlisting}[language=PDDL, caption={Especificació del problema en PDDL}, label={lst:problemaPDDL}]
+	(define (problem example-problem)
+		(:domain example-domain)
+		(:objects
+			block1 block2 block3 table
+		)
+		(:init
+			(on block1 table)
+			(on block2 table)
+			...
+		)
+		(:goal
+			(and (on block1 block2) (on block2 block3))
+		)
+	)
+	\end{lstlisting}
+	
+	\newpage
+	\section{Annexos}
+	
+	\subsection{Intèrpret per a sortides de FF i MFF}
+	
+	Aquest annex descriu l'algorisme utilitzat per analitzar les sortides generades pels planificadors Fast Forward (FF) i Metric Fast Forward (MFF). S'ha fet mitjançant Python. \\
+	
+	Aquest programa està dissenyat per interpretar la sortida generada pels planificadors automàtics Fast Forward (FF) i Metric Fast Forward (MFF). En iniciar-se, el programa presenta diverses opcions a l'usuari, com triar entre FF (Extensió 3), MFF amb un problema generat aleatòriament, o MFF amb un problema específic (Extensió 4). Un cop seleccionada l'opció, el programa executa el planificador corresponent i captura la seva sortida. Aquesta sortida és analitzada per extreure les accions rellevants, com ara assignacions de contingut o configuracions de dies únics. Finalment, les accions són organitzades en una estructura que mostra les tasques agrupades per dia, facilitant la seva visualització i interpretació com una taula o llista estructurada. Això permet obtenir una visió clara del pla generat pel sistema.
+	
+	\begin{algorithm}[H]
+		\caption{Intèrpret de sortides de FF i MFF}\label{alg:ffinterpreter}
+		\begin{algorithmic}[1]
+			\State \textbf{Entrada:} Sortida del planificador (stdout)
+			\State \textbf{Sortida:} Pla organitzat per dies
+			\State Inicialitzar \texttt{plan\_by\_day} com un diccionari buit
+			\State Definir patrons per a les accions \texttt{ADD\_CONTENT}, \texttt{SET\_DAY\_UNIQUE}, i \texttt{SET\_DAY}
+			\For{cada línia en la sortida del planificador}
+			\State Eliminar espais innecessaris i prefixos de la línia
+			\If{la línia conté \texttt{ADD\_CONTENT}}
+			\State Extraure el contingut i guardar-lo
+			\ElsIf{la línia conté \texttt{SET\_DAY\_UNIQUE}}
+			\State Extraure contingut i dia, i afegir-ho a \texttt{plan\_by\_day}
+			\ElsIf{la línia conté \texttt{SET\_DAY}}
+			\State Extraure contingut i dia, i afegir-ho a \texttt{plan\_by\_day}
+			\EndIf
+			\EndFor
+			\State Retornar \texttt{plan\_by\_day}
+		\end{algorithmic}
+	\end{algorithm}
+	
 
 \end{document}
