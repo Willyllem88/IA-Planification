@@ -35,8 +35,8 @@
                 (when (and 
                     (or (predecessor ?c2 ?c)(parallel ?c2 ?c)) 
                     (not (watched ?c2)) 
-                    (not) (is_wanted ?c2))
-                        (is_wanted ?c2))   
+                    (not (is_wanted ?c2)))
+                        (is_wanted ?c2))
             )
         )
     )
