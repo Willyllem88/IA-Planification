@@ -155,8 +155,8 @@ if __name__ == '__main__':
         result = subprocess.run(["./FF/ff.exe", "-o", domain_file, "-f", problem_file], 
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     if decision == 4:
-        print("Comando: ./FF/metricff.exe -o", domain_file, "-f", problem_file)
-        result = subprocess.run(["./FF/metricff.exe", "-o", domain_file, "-f", problem_file], 
+        print("Comando: ./FF/metricff.exe -o", domain_file, "-f", problem_file, "-O")
+        result = subprocess.run(["./FF/metricff.exe", "-o", domain_file, "-f", problem_file, "-O"], 
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     print(result.stdout)  # Muestra la salida de FF
