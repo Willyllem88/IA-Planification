@@ -1,4 +1,5 @@
 import re
+import os
 import subprocess
 from tkinter import filedialog
 from collections import defaultdict
@@ -108,13 +109,27 @@ if __name__ == '__main__':
     problem_file = ""
 
     options = {
-        0: "./prototipos/nivel_basico/redflix0.pddl",
-        1: "./prototipos/extension_1/redflix1.pddl",
-        2: "./prototipos/extension_2/redflix2.pddl",
-        3: "./prototipos/extension_3/redflix3.pddl",
-        4: "./prototipos/extension_4/redflix4.pddl",
+        0: "prototipos/nivel_basico/redflix0.pddl",
+        1: "prototipos/extension_1/redflix1.pddl",
+        2: "prototipos/extension_2/redflix2.pddl",
+        3: "prototipos/extension_3/redflix3.pddl",
+        4: "prototipos/extension_4/redflix4.pddl",
     }
 
+    # Genera un problema aleatorio adicional para la extensión 4
+    if decision == 4:
+        print("\n")
+        print("=" * 60)
+        print("🎲 Generador de Problemas Aleatorios para Extensión 4 🎲".center(50))
+        print("=" * 60)
+        print("\n🔹 En esta extensión, hay disponible un generador.")
+        print("   Los problemas estarán disponibles en el directorio: `random_problems/`.")
+        print("\n❓ ¿Desea generar 5 nuevos problemas aleatorios adicionales?")
+        generate_random = input("   👉 Responda con 's' para Sí o 'n' para No: ").strip().lower()
+        if generate_random == 's':
+            subprocess.run(["python3", "ExamplesGenerator.py"])
+
+    # Pide al usuario seleccionar un archivo de problema
     if decision in options:
         domain_file = options[decision]
         problem_file = filedialog.askopenfilename(
@@ -126,35 +141,23 @@ if __name__ == '__main__':
         print("❌ Opción inválida.")
         exit()
 
-    if decision < 4:
-        print("Comando: ./ff.exe -o", domain_file, "-f", problem_file)
-        result = subprocess.run(["./ff.exe", "-o", domain_file, "-f", problem_file], 
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-    """
-    #print("Escoja que desea ejecutar:")
-    #print("[0] Fast Forward (FF)")
-    #print("[1] Metric Fast Forward (MFF) Random Problem")
-    #print("[2] Metric Fast Forward (MFF)")
-    decision = int(input())
-
-    if decision == 0:
-    # Ejecuta el comando FF y captura su salida estándar (stdout)
-        result = subprocess.run(["./ff.exe", "-o", "redflix.pddl", "-f", "redflix-problem.pddl"], 
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    elif decision == 1:
-        create = input("Do you want to generate new random problem? (n/y): ")
-        if create == "y":
-            subprocess.run(["python3", "ExamplesGenerator.py"])
-        choice = int(input("Choose a random problem to solve (1-5): "))
-        redflix = f'./random_problems/problem_{choice}.pddl'
-        print(redflix)
-        result = subprocess.run(["./metricff.exe", "-o", "redflixExtensio4.pddl", "-f", redflix], 
-                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    # Muestra la ruta relativa del archivo seleccionado
+    if problem_file:
+        problem_file = os.path.relpath(problem_file, start=os.getcwd())
+        print(f"Archivo seleccionado (relativo): {problem_file}")
     else:
-        result = subprocess.run(["./metricff.exe", "-o", "redflixExtensio4.pddl", "-f", "redflixExtensio4-problem.pddl"], 
+        problem_file = None
+        print("No se seleccionó ningún archivo.")
+
+    # Ejecuta el comando FF y captura su salida estándar (stdout)
+    if decision < 4:
+        print("Comando: ./FF/ff.exe -o", domain_file, "-f", problem_file)
+        result = subprocess.run(["./FF/ff.exe", "-o", domain_file, "-f", problem_file], 
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    """
+    if decision == 4:
+        print("Comando: ./FF/metricff.exe -o", domain_file, "-f", problem_file)
+        result = subprocess.run(["./FF/metricff.exe", "-o", domain_file, "-f", problem_file], 
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
     print(result.stdout)  # Muestra la salida de FF
     
