@@ -1,9 +1,9 @@
 (define (domain redflix)
-    (:requirements :adl :typing :equality)
+    (:requirements :adl :typing :equality :fluents)
     (:types 
         content - object
         day - object)
-  
+
     (:predicates
         (watched ?c - content)
         (is_wanted ?c - content)
@@ -12,11 +12,16 @@
         (yesterday ?d1 - day ?d2 - day) ; d1 es el día anterior a d2
         (parallel ?c1 - content ?c2 - content) ; c1 y c2 son contenidos paralelos
         (assigned ?c - content) ; c tiene un día asignado
-
-        (assigned_one ?d - day)
-        (assigned_two ?d - day)
-        (assigned_three ?d - day)
     )
+
+    (:functions
+        (total-days)
+        (priority ?d - day) ;prioridad de un día para asignar contenido
+        (duration ?c - content)
+        (day_duration ?d - day)
+        (remaining-content)  ; Number of unassigned wanted contents
+    )
+
 
     ;; Acción para ver un contenido en un día
     (:action add_content
@@ -32,39 +37,33 @@
                     (or (predecessor ?c2 ?c)(parallel ?c2 ?c)) 
                     (not (watched ?c2)) 
                     (not (is_wanted ?c2)))
-                        (is_wanted ?c2))   
+                        (is_wanted ?c2))
             )
         )
     )
-
+    
     ;; Acción para poner dia a un contenido sin postsucesores
     (:action set_day_unique
         :parameters (?c - content ?d - day)
         :precondition (and 
             (is_wanted ?c)
             (not (watched ?c))
-            (not (assigned ?c)) ;asegura que no tiene un día asignado            
-            (or 
-                (not (assigned_one ?d))
-                (not (assigned_two ?d))
-                (not (assigned_three ?d)))
-            ;; Verifica que no haya sucesores que no hayan sido vistos
-            (not (exists (?c2 - content) 
+            (not (assigned ?c))
+            (<= (+ (day_duration ?d) (duration ?c)) 200) ; Verifica que no se pase de 200 minutos
+            ;; Verifica que no haya sucesores  ni contenidos paralelos que no hayan sido vistos
+            (not (exists (?c2 - content)         
                 (and 
-                    (predecessor ?c ?c2)
-                    (not (watched ?c2)))))
-            ;; Verifica que no haya contenidos paralelos que no hayan sido vistos
-            (not (exists (?c2 - content) 
-                (and 
-                    (parallel ?c ?c2)
-                    (not (watched ?c2)))))
+                    (or (predecessor ?c ?c2) (parallel ?c ?c2))
+                    (not (watched ?c2))
+                    (is_wanted ?c2)))
+            )           
         )
         :effect (and 
             (day_to_watch ?c ?d)
-            (when (not (assigned_one ?d)) (assigned_one ?d))
-            (when (and (assigned_one ?d) (not (assigned_two ?d))) (assigned_two ?d))
-            (when (and (assigned_one ?d) (assigned_two ?d) (not (assigned_three ?d))) (assigned_three ?d))
             (assigned ?c)
+            (increase (day_duration ?d) (duration ?c))
+            (increase (total-days) (priority ?d))  ; Incrementa días usados
+            (decrease (remaining-content) 1)  ; Decrementa contenidos por ver
         )
     )  
 
@@ -74,31 +73,27 @@
         :precondition (and 
             (is_wanted ?c1)
             (not (assigned ?c1)) ;asegura que no tiene un día asignado
-            (day_to_watch ?c2 ?d2)
-            (or 
-                (not (assigned_one ?d1))
-                (not (assigned_two ?d1))
-                (not (assigned_three ?d1)))
-
+            (<= (+ (day_duration ?d1) (duration ?c1)) 200) ; Verifica que no se pase de 200 minutos
             (or 
                 ;condiciones para contenido paralelo
                 (and
                     (parallel ?c1 ?c2)
+                    (day_to_watch ?c2 ?d2)
                     (or 
                         (yesterday ?d1 ?d2)
                         (= ?d1 ?d2)))
                 ;condiciones para contenido predecessor
                 (and
                     (predecessor ?c1 ?c2)
-                    (yesterday ?d1 ?d2))
-            )  
-        )
+                    (day_to_watch ?c2 ?d2) 
+                    (yesterday ?d1 ?d2)
+        )))
         :effect (and 
             (day_to_watch ?c1 ?d1)
-            (when (not (assigned_one ?d1)) (assigned_one ?d1))
-            (when (and (assigned_one ?d1) (not (assigned_two ?d1))) (assigned_two ?d1))
-            (when (and (assigned_one ?d1) (assigned_two ?d1) (not (assigned_three ?d1))) (assigned_three ?d1))
             (assigned ?c1)
+            (increase (total-days) (priority ?d1)) ; Incrementa días usados
+            (increase (day_duration ?d1) (duration ?c1))                
+            (decrease (remaining-content) 1) ; Decrementa contenidos por ver
         )
     )
 )

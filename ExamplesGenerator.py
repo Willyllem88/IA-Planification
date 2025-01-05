@@ -140,7 +140,7 @@ def generate_random_problem(filename="random_problem.pddl"):
         f.write(")\n")
 
 if __name__ == "__main__":
-    output_dir = "random_problems"
+    output_dir = "prototipos/extension_4/random_problems"
     os.makedirs(output_dir, exist_ok=True)
 
     for i in range(5):  # Generate 5 random problems
