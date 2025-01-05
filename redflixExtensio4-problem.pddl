@@ -81,6 +81,24 @@
         (= (day_duration day10) 0)
         (= (day_duration day11) 0)
         (= (day_duration day12) 0)
+
+        (= (priority day1) 1)
+        (= (priority day2) 2)
+        (= (priority day3) 3)
+        (= (priority day4) 4)
+        (= (priority day5) 5)
+        (= (priority day6) 6)
+        (= (priority day7) 7)
+        (= (priority day8) 8)
+        (= (priority day9) 9)
+        (= (priority day10) 10)
+        (= (priority day11) 11)
+        (= (priority day12) 12)
+
+   
+        
+  
+     
         
 
         (= (total-days) 0)

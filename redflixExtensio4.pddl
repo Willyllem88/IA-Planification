@@ -16,6 +16,7 @@
 
     (:functions
         (total-days)
+        (priority ?d - day) ;prioridad de un día para asignar contenido
         (duration ?c - content)
         (day_duration ?d - day)
         (remaining-content)  ; Number of unassigned wanted contents
@@ -61,7 +62,7 @@
             (day_to_watch ?c ?d)
             (assigned ?c)
             (increase (day_duration ?d) (duration ?c))
-            (increase (total-days) 1)  ; Incrementa días usados
+            (increase (total-days) (priority ?d))  ; Incrementa días usados
             (decrease (remaining-content) 1)  ; Decrementa contenidos por ver
         )
     )  
@@ -90,7 +91,7 @@
         :effect (and 
             (day_to_watch ?c1 ?d1)
             (assigned ?c1)
-            (increase (total-days) 1)
+            (increase (total-days) (priority ?d1)) ; Incrementa días usados
             (increase (day_duration ?d1) (duration ?c1))                
             (decrease (remaining-content) 1) ; Decrementa contenidos por ver
         )

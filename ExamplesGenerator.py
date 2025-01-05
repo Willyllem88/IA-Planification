@@ -116,6 +116,12 @@ def generate_random_problem(filename="random_problem.pddl"):
             f.write(f"        (= (day_duration {day}) 0)\n")
         f.write("\n")
 
+        # Initialize day priorities
+        for i in range(len(days)):
+            f.write(f"        (= (priority {days[i]}) {i+1})\n")
+        f.write("\n")
+       
+
         # Initialize total metrics
         f.write("        (= (total-days) 0)\n")
         f.write(f"        (= (remaining-content) {to_plan})\n")
