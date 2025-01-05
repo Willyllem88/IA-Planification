@@ -465,7 +465,32 @@
 	
 	\newpage
 	\section{Jocs de prova}
-	**************El conjunto de problemas de prueba (mínimo 2 por extensión), explicando para cadauno que es lo que intentan probar y su resultado. Podéis partir de los juegos de pruebapara el nivel básico e ir añadiendo los elementos que cada extensión requiera. Si habéisimplementado el generador de problemas, al menos uno de los juegos de prueba de cadaextensión ha de ser obtenido de este.
+	**************El conjunto de problemas de prueba (mínimo 2 por extensión), explicando para cada uno que es lo que intentan probar y su resultado. Podéis partir de los juegos de pruebapara el nivel básico e ir añadiendo los elementos que cada extensión requiera. Si habéisimplementado el generador de problemas, al menos uno de los juegos de prueba de cadaextensión ha de ser obtenido de este.
+	
+	En aquest apartat, presentem els jocs de prova dissenyats per a avaluar el model del problema desenvolupat en PDDL per a les diverses extensions. Aquests jocs de prova consisteixen en conjunts de problemes escollits que simulen diferents escenaris del domini, variant en complexitat i restriccions per provar diversos casos. Alguns d'aquests jocs de prova han estat generats per un fitxer en Python que genera problemes de manera aleatòria, el qual s'explica a continuació. L'objectiu d'aquests casos de prova és avaluar el bon comportament del model enfront de diverses configuracions i relacions entre els elements del problema. Els problemes generats permeten validar tant la correcció del model com la seva adequació als requisits plantejats.
+	
+
+	
+	\subsection{Generador de problemes}	
+	
+	El programa en Python genera automàticament 5 fitxers de problemes en format PDDL de manera aleatòria i els guarda en una carpeta que crea en el mateix directori on es troba aquest fitxer. Els problemes generats són útils per a provar i avaluar algorismes de planificació automàtica, ja que ofereixen escenaris variats i bastants exemples per provar el model  en una àmplia varietat de configuracions; a més a més, estan creats per a que es pugui obtenir un pla en la majoria dels casos generats. 
+	Detalls del programa:
+	
+	Estructura del problema:
+	Cada problema inclou un conjunt de continguts (contents) que en genera un nombre aleatori  i un conjunt de dies(days) de quantitat aleatòria al voltant del nombre de continguts que s'han de planificar per assegurar que hi hagi un plan. 
+	Els continguts es classifiquen uns quants en is\_wanted del conjunt de continguts d'abans de manera aleatòria i es generen un nombre aleatori petit de nous continguts que seran watched.
+	
+	Generació de dades i relacions:
+	Les relacions entre els continguts es generen aleatòriament, assegurant que no hi hagi redundàncies ni conflictes entre les relacions de precedència i paral·lelisme.
+	A cada contingut se li assigna una durada aleatòria, representant el temps necessari per a consumir-lo.
+	
+	Inicialització de l'estat:
+	En la secció :init del problema, s'especifiquen totes les relacions de precedència i paral·lelisme, els continguts desitjats, els continguts ja vists, les durades dels continguts, i les relacions temporals entre els dies (per exemple, quin dia precedeix a un altre).
+	També s'inicialitzen mètriques com day\_duration i remaining-content que es calcula.
+	
+	Definició de l'objectiu i mètrica:
+	Es posa també l'objectiu i la mètrica a optimitzar que es igual sempre.
+	
 	
 	\subsection{Nivell Bàsic}
 	
@@ -477,7 +502,7 @@
 	
 	\subsection{Extensió 4}
 	
-	\subsection{Generador de problemes}	
+	
 	
 	\newpage
 	\section{Conclusió}
@@ -485,6 +510,7 @@
 	El desenvolupament d'aquest projecte ens ha proporcionat una oportunitat per posar en pràctica els coneixements adquirits sobre planificació automàtica i modelatge mitjançant PDDL. Hem pogut aplicar de manera progressiva els conceptes teòrics apresos per finalment desenvolupar un sistema funcional que compleix els requisits establerts.\\ 
 	
 	El treball ha estat un repte significatiu, sobretot a l'hora d'implementar les diferents extensions i garantir que totes les funcionalitats fossin compatibles. A través d'aquest procés, hem millorat la nostra comprensió dels sistemes de planificació.
+	
 	
 	
 	\subsection{Coneixements adquirits}
