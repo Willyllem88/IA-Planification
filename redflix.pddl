@@ -43,6 +43,7 @@
         :precondition (and 
             (is_wanted ?c)
             (not (watched ?c))
+            (not (assigned ?c)) ;asegura que no tiene un día asignado            
             (or 
                 (not (assigned_one ?d))
                 (not (assigned_two ?d))
@@ -72,6 +73,7 @@
         :parameters (?c1 ?c2 - content ?d1 ?d2 - day)
         :precondition (and 
             (is_wanted ?c1)
+            (not (assigned ?c1)) ;asegura que no tiene un día asignado
             (day_to_watch ?c2 ?d2)
             (or 
                 (not (assigned_one ?d1))
