@@ -1,0 +1,91 @@
+(define (problem random-redflix-problem)
+    (:domain redflix)
+
+    (:objects
+        c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 c19 w1 w2 w3 - content
+        day1 day2 day3 day4 day5 day6 day7 day8 - day
+    )
+
+    (:init
+        (predecessor c3 c4)
+        (predecessor c4 c5)
+        (predecessor c5 c6)
+        (predecessor c6 c7)
+        (predecessor c7 c8)
+        (predecessor c9 c10)
+        (predecessor c11 c12)
+        (predecessor c12 c13)
+        (predecessor c15 c16)
+        (predecessor c17 c18)
+
+        (parallel c2 c6)
+        (parallel w1 c17)
+
+        (is_wanted c9)
+        (is_wanted c4)
+        (is_wanted c1)
+        (is_wanted c11)
+        (is_wanted c3)
+        (is_wanted c19)
+        (is_wanted c8)
+        (is_wanted c5)
+        (is_wanted c15)
+        (is_wanted c18)
+        (is_wanted c16)
+
+        (watched w1)
+        (watched w2)
+        (watched w3)
+
+        (= (duration c1) 51)
+        (= (duration c2) 48)
+        (= (duration c3) 100)
+        (= (duration c4) 50)
+        (= (duration c5) 40)
+        (= (duration c6) 66)
+        (= (duration c7) 58)
+        (= (duration c8) 96)
+        (= (duration c9) 105)
+        (= (duration c10) 117)
+        (= (duration c11) 75)
+        (= (duration c12) 98)
+        (= (duration c13) 114)
+        (= (duration c14) 84)
+        (= (duration c15) 43)
+        (= (duration c16) 95)
+        (= (duration c17) 49)
+        (= (duration c18) 120)
+        (= (duration c19) 45)
+        (= (duration w1) 107)
+        (= (duration w2) 48)
+        (= (duration w3) 46)
+
+        (yesterday day1 day2)
+        (yesterday day2 day3)
+        (yesterday day3 day4)
+        (yesterday day4 day5)
+        (yesterday day5 day6)
+        (yesterday day6 day7)
+        (yesterday day7 day8)
+
+        (= (day_duration day1) 0)
+        (= (day_duration day2) 0)
+        (= (day_duration day3) 0)
+        (= (day_duration day4) 0)
+        (= (day_duration day5) 0)
+        (= (day_duration day6) 0)
+        (= (day_duration day7) 0)
+        (= (day_duration day8) 0)
+
+        (= (total-days) 0)
+        (= (remaining-content) 15)
+    )
+
+    (:goal
+        (and
+            (= (remaining-content) 0)
+        )
+    )
+
+    (:metric minimize (total-days))
+)
