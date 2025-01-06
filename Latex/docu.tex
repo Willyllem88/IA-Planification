@@ -1031,94 +1031,92 @@
 	
 	\noindent
 	\begin{minipage}[t]{0.45\textwidth}
-		\begin{lstlisting}[language=PDDL, caption={Joc de Prova 1 - Extensió 3}, label={lst:JP13}]                     
-			(define (problem redflix-problem)
-			(:domain redflix)
-			
-			(:objects
-			bb_s0 bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 bb_s6 bb_s7 aa1 aa2 cc1 cc2 cc3 - content
-			day1 day2 day3  - day)
-			
-			(:init
-			;; Contenidos ya vistos
-			(watched bb_s4)
-			(watched aa1)
-			
-			;; Contenidos por ver
-			(is_wanted bb_s5)
-			(is_wanted bb_s3)
-			(is_wanted aa2)
-			(is_wanted cc1)
-			(is_wanted cc2)
-			(is_wanted cc3)
-			
-			;; Relaciones entre contenidos
-			;;predecesores
-			(predecessor bb_s0 bb_s2)
-			(predecessor bb_s1 bb_s2)
-			(predecessor bb_s2 bb_s5)
-			(predecessor bb_s3 bb_s5)
-			(predecessor bb_s4 bb_s5)
-			(predecessor bb_s5 bb_s6)
-			
-			;;paralelos
-			(parallel aa1 bb_s5)
-			(parallel aa2 bb_s5)
-			(parallel bb_s5  bb_s7)
-			
-			;; Dias anteriores
-			(yesterday day1 day2)
-			(yesterday day2 day3))
-			
-			(:goal (and
-			(assigned bb_s1)
-			(assigned bb_s0)
-			(assigned bb_s3)
-			(assigned aa2)
-			(assigned cc1)
-			(assigned cc2)
-			(assigned cc3)))
-			)	
-		\end{lstlisting}
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 1 - Extensió 3}, label={lst:JP13}]                     
+	(define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+		bb_s0 bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 bb_s6 bb_s7 aa1 aa2 cc1 cc2 cc3 - content
+		day1 day2 day3  - day)
+	
+	(:init
+		;; Contenidos ya vistos
+		(watched bb_s4)
+		(watched aa1)
 		
+		;; Contenidos por ver
+		(is_wanted bb_s5)
+		(is_wanted bb_s3)
+		(is_wanted aa2)
+		(is_wanted cc1)
+		(is_wanted cc2)
+		(is_wanted cc3)
+		
+		;; Relaciones entre contenidos predecesores
+		(predecessor bb_s0 bb_s2)
+		(predecessor bb_s1 bb_s2)
+		(predecessor bb_s2 bb_s5)
+		(predecessor bb_s3 bb_s5)
+		(predecessor bb_s4 bb_s5)
+		(predecessor bb_s5 bb_s6)
+		
+		;;paralelos
+		(parallel aa1 bb_s5)
+		(parallel aa2 bb_s5)
+		(parallel bb_s5  bb_s7)
+		
+		;; Dias anteriores
+		(yesterday day1 day2)
+		(yesterday day2 day3))
+	
+	(:goal (and
+		(assigned bb_s1)
+		(assigned bb_s0)
+		(assigned bb_s3)
+		(assigned aa2)
+		(assigned cc1)
+		(assigned cc2)
+		(assigned cc3)))
+	)	
+	\end{lstlisting}
 	\end{minipage}
 	\hfill
 	\begin{minipage}[t]{0.45\textwidth}
-		\begin{lstlisting}[language=PDDL, caption={Joc de Prova 2 - Extensió 3}, label={lst:JP23}]                    (define (problem redflix-problem)
-			(:domain redflix)
-			
-			(:objects
-			bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
-			day1 day2 day3 day4 day5 day6 day7 - day)
-			
-			(:init
-			(is_wanted bb_s5)
-			(is_wanted cc2)
-			
-			(predecessor bb_s1 bb_s2)
-			(predecessor bb_s2 bb_s3)
-			(predecessor bb_s3 bb_s4)
-			(predecessor bb_s4 bb_s5)
-			(predecessor cc1 cc2)
-			
-			(parallel aa1 bb_s5)
-			(parallel aa2 bb_s5)
-			(parallel aa3 bb_s5)
-			
-			(yesterday day1 day2)
-			(yesterday day2 day3)
-			(yesterday day3 day4)
-			(yesterday day4 day5))
-			
-			(:goal
-			(and
-			(day_to_watch bb_s1 day1)
-			(assigned aa1)
-			(assigned aa2)
-			(assigned aa3)
-			(assigned cc1)))
-			)	
-		\end{lstlisting}
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 2 - Extensió 3}, label={lst:JP23}]                    (define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+		bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
+		day1 day2 day3 day4 day5 day6 day7 - day)
+	
+	(:init
+		(is_wanted bb_s5)
+		(is_wanted cc2)
+		
+		(predecessor bb_s1 bb_s2)
+		(predecessor bb_s2 bb_s3)
+		(predecessor bb_s3 bb_s4)
+		(predecessor bb_s4 bb_s5)
+		(predecessor cc1 cc2)
+		
+		(parallel aa1 bb_s5)
+		(parallel aa2 bb_s5)
+		(parallel aa3 bb_s5)
+		
+		(yesterday day1 day2)
+		(yesterday day2 day3)
+		(yesterday day3 day4)
+		(yesterday day4 day5))
+	
+	(:goal
+		(and
+		(day_to_watch bb_s1 day1)
+		(assigned aa1)
+		(assigned aa2)
+		(assigned aa3)
+		(assigned cc1)))
+	)	
+	\end{lstlisting}
 	\end{minipage}
 	
 	\subsubsection*{Joc de prova Random}
@@ -1146,14 +1144,13 @@
 	\end{figure}
 	
 	\begin{lstlisting}[language=PDDL, caption={Joc de Prova Random - Extensió 3}, label={lst:JPR3}]                  
-		(define (problem random-redflix-problem)
-		(:domain redflix)
-		
-		(:objects
-		c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 w1 w2 w3 - content
-		day1 day2 day3 day4 day5 day6 day7 day8 day9 - day)
-		
-		(:init
+	(define (problem random-redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+		y1 day2 day3 day4 day5 day6 day7 day8 day9 - day)
+	
+	(:init
 		(predecessor c1 c2)
 		(predecessor c2 c3)
 		(predecessor c3 c4)
@@ -1185,16 +1182,13 @@
 		(yesterday day6 day7)
 		(yesterday day7 day8)
 		(yesterday day8 day9))
-		
-		(:goal
+	
+	(:goal
 		(and
 		(day_to_watch c1 day1)
 		(assigned c18)
 		(assigned c10)))
-		)
-		
-		
-		
+	)	
 	\end{lstlisting}
 	
 	\subsection{Extensió 4}
@@ -1211,20 +1205,20 @@
 	\begin{figure}[H]
 		\centering
 		\begin{verbatim}
-			Planificación por día:
-			
-			DAY1: CC1, BB_S1
-			DAY10: BB_S10
-			DAY11: BB_S11, AA1, AA3
-			DAY12: BB_S12, AA2
-			DAY2: CC2, BB_S2
-			DAY3: BB_S3
-			DAY4: BB_S4
-			DAY5: BB_S5
-			DAY6: BB_S6
-			DAY7: BB_S7
-			DAY8: BB_S8
-			DAY9: BB_S9
+		Planificación por día:
+		
+		DAY1: CC1, BB_S1
+		DAY10: BB_S10
+		DAY11: BB_S11, AA1, AA3
+		DAY12: BB_S12, AA2
+		DAY2: CC2, BB_S2
+		DAY3: BB_S3
+		DAY4: BB_S4
+		DAY5: BB_S5
+		DAY6: BB_S6
+		DAY7: BB_S7
+		DAY8: BB_S8
+		DAY9: BB_S9
 		\end{verbatim}
 		\caption{Sortida de FFInterpreter.py (\ref{sec:FFInterpreter.py}) del E4-J1.}
 	\end{figure}
@@ -1233,14 +1227,14 @@
 	
 	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 1 - Extensió 4
 		}, label={lst:JP14}]                     
-		(define (problem redflix-problem)
-		(:domain redflix)
-		
-		(:objects
+	(define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
 		bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 bb_s6 bb_s7 bb_s8 bb_s9 bb_s10 bb_s11 bb_s12 aa1 aa2 aa3 cc1 cc2 - content
 		day1 day2 day3 day4 day5 day6 day7 day8 day9 day10 day11 day12 - day)
-		
-		(:init
+	
+	(:init
 		(is_wanted bb_s12)	(is_wanted cc2)
 		(predecessor bb_s1 bb_s2)
 		(predecessor bb_s2 bb_s3)
@@ -1305,13 +1299,11 @@
 		(= (priority day11) 11) (= (priority day12) 12)
 		(= (total-days) 0)
 		(= (remaining-content) 17))
-		
-		(:goal (and
+	
+	(:goal (and
 		(= (remaining-content) 0)))
-		(:metric minimize (total-days))
-		)
-		
-		
+	(:metric minimize (total-days))
+	)	
 	\end{lstlisting}
 	
 	\subsubsection*{Joc de prova 2}
@@ -1338,14 +1330,14 @@
 	
 	
 	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 2 - Extensió 4}, label={lst:JP24}]                    
-		(define (problem redflix-problem)
-		(:domain redflix)
-		
-		(:objects
+	(define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
 		a1 a2 a3 a4 a5 a6 a7 b1 b2 b3 c1 c2 c3 c4 d1 d2 - content
 		day1 day2 day3 day4 day5 day6 day7 day8 day9 day10 - day)
-		
-		(:init
+	
+	(:init
 		(watched a4)
 		(watched d1)
 		;; Contenidos por ver
@@ -1418,11 +1410,11 @@
 		
 		(= (total-days) 0)
 		(= (remaining-content) 12) 
-		
-		(:goal (and
+	
+	(:goal (and
 		(= (remaining-content) 0)))
-		(:metric minimize (total-days))
-		)
+	(:metric minimize (total-days))
+	)
 		
 	\end{lstlisting}
 	
@@ -1440,28 +1432,27 @@
 	\begin{figure}[H]
 		\centering
 		\begin{verbatim}
-			Planificación por día:
-			
-			DAY1: C11, C14
-			DAY2: C7, C8
-			DAY3: C9, C1
-			DAY4: C17, C2
-			DAY5: C3
-			DAY6: C4
+		Planificación por día:
+		
+		DAY1: C11, C14
+		DAY2: C7, C8
+		DAY3: C9, C1
+		DAY4: C17, C2
+		DAY5: C3
+		DAY6: C4
 		\end{verbatim}
 		\caption{Sortida de FFInterpreter.py (\ref{sec:FFInterpreter.py}) del E4-RND.}
 	\end{figure}
 	
 	\begin{lstlisting}[language=PDDL, caption={Joc de Prova Random - Extensió 4}, label={lst:JPR4}]                  
-		(define (problem random-redflix-problem)
-		(:domain redflix)
-		
-		(:objects
+	(define (problem random-redflix-problem)
+	(:domain redflix)
+	
+	(:objects
 		c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 w1 w2 w3 - content
-		day1 day2 day3 day4 day5 day6 day7 day8 day9 day10 day11 day12 day13 day14 - day
-		)
-		
-		(:init
+		day1 day2 day3 day4 day5 day6 day7 day8 day9 day10 day11 day12 day13 day14 - day)
+	
+	(:init
 		(predecessor c1 c2)
 		(predecessor c2 c3)
 		(predecessor c3 c4)
@@ -1557,13 +1548,13 @@
 		
 		(= (total-days) 0)
 		(= (remaining-content) 10))
-		
-		(:goal
+	
+	(:goal
 		(and
 		(= (remaining-content) 0)))
-		
-		(:metric minimize (total-days))
-		)
+	
+	(:metric minimize (total-days))
+	)
 	\end{lstlisting}
 	
 	
