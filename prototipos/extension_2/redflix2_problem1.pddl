@@ -3,8 +3,8 @@
 
     ;; Definición de objetos
     (:objects
-        bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
-        day1 day2 day3 day4 day5 day6 day7 - day
+        bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 - content
+        day1 day2 day3 day4 day5 - day
     )
 
     ;; Estado inicial
@@ -13,7 +13,6 @@
 
         ;; Contenidos por ver
         (is_wanted bb_s5)
-        (is_wanted cc2)
 
         ;; Relaciones entre contenidos
         ;;predecesores
@@ -21,7 +20,6 @@
         (predecessor bb_s2 bb_s3)
         (predecessor bb_s3 bb_s4)
         (predecessor bb_s4 bb_s5)
-        (predecessor cc1 cc2)
 
         ;;paralelos
         (parallel aa1 bb_s5)
@@ -42,7 +40,6 @@
             (assigned aa1)
             (assigned aa2)
             (assigned aa3)
-            (assigned cc1)
         )
     )
 )

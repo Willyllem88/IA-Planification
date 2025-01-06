@@ -48,16 +48,13 @@
                 (not (assigned_one ?d))
                 (not (assigned_two ?d))
                 (not (assigned_three ?d)))
-            ;; Verifica que no haya sucesores que no hayan sido vistos
-            (not (exists (?c2 - content) 
+           ;; Verifica que no haya sucesores  ni contenidos paralelos que no hayan sido vistos
+            (not (exists (?c2 - content)         
                 (and 
-                    (predecessor ?c ?c2)
-                    (not (watched ?c2)))))
-            ;; Verifica que no haya contenidos paralelos que no hayan sido vistos
-            (not (exists (?c2 - content) 
-                (and 
-                    (parallel ?c ?c2)
-                    (not (watched ?c2)))))
+                    (or (predecessor ?c ?c2) (parallel ?c ?c2))
+                    (not (watched ?c2))
+                    (is_wanted ?c2)))
+            )         
         )
         :effect (and 
             (day_to_watch ?c ?d)
@@ -80,18 +77,20 @@
                 (not (assigned_two ?d1))
                 (not (assigned_three ?d1)))
 
-            (or 
+             (or 
                 ;condiciones para contenido paralelo
                 (and
                     (parallel ?c1 ?c2)
+                    (day_to_watch ?c2 ?d2)
                     (or 
                         (yesterday ?d1 ?d2)
                         (= ?d1 ?d2)))
                 ;condiciones para contenido predecessor
                 (and
                     (predecessor ?c1 ?c2)
-                    (yesterday ?d1 ?d2))
-            )  
+                    (day_to_watch ?c2 ?d2) 
+                    (yesterday ?d1 ?d2)
+            ))
         )
         :effect (and 
             (day_to_watch ?c1 ?d1)

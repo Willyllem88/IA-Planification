@@ -4,7 +4,7 @@
     ;; Definición de objetos
     (:objects
         bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
-        day1 day2 day3 day4 day5 day6 day7 - day
+        day1 day2 day3 day4 day5 - day
     )
 
     ;; Estado inicial
