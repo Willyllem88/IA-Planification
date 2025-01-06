@@ -100,12 +100,12 @@
 	Els predicats representen les relacions i restriccions entre els continguts i els dies i són la base per definir les precondicions i efectes de les accions. Mostrarem primer els predicats del problema amb \textbf{Nivell senzill}. I a continuació afegirem els predicats conforme avancem per les diferents extensions.
 	
 	\begin{itemize}
-		\item \texttt{(watched ?c - content)}: Indica que un contingut \texttt{?c} ja s'ha vist.
+		\item \texttt{(watched ?c - content)}: Indica que un contingut \texttt{?c} ja s'ha vist i no cal assignar-lo al plan si es tracta d'algun predecessor o paral·lel d'algun contingut que es desitja veure.
 		\item \texttt{(is\_wanted ?c - content)}: Indica que l'usuari pot veure un contingut \texttt{?c}.
 		\item \texttt{(predecessor ?c1 - content ?c2 - content)}: Indica que el contingut \texttt{?c1} és predecessor de \texttt{?c2}. Per tant, \texttt{?c1} s'ha de veure abans que \texttt{?c2}.
 		\item \texttt{(day\_to\_watch ?c - content ?d - day)}: Assigna un contingut \texttt{?c} a un dia \texttt{?d}.
 		\item \texttt{(yesterday ?d1 - day ?d2 - day)}: Indica que \texttt{?d1} és el dia anterior a \texttt{?d2}.
-		\item \texttt{(assigned ?c - content)}: Marca que un contingut \texttt{?c} ja té un dia assignat.
+		\item \texttt{(assigned ?c - content)}: Marca que un contingut \texttt{?c} ja té un dia assignat per evitar que s'assigni a més de un dia.
 	\end{itemize}
 	
 	\noindent Siguin aquests els predicats del \textbf{Nivell bàsic}, ara ennumerarem els predicats de les altres extensions: \\
@@ -135,10 +135,12 @@
 	Les funcions introdueixen fluents per gestionar informació numèrica. Aquestes només es fan servir per l'Extensió 4:
 	
 	\begin{itemize}
-		\item \texttt{(total-days)}: Enregistra el nombre total de dies utilitzats. Necessari per optimitzar el pla.
+		\item \texttt{(priority ?d - day)}: Indica la prioritat assignada a un dia, per poder optimitzar la distribució dels continguts en dies;
+		\item \texttt{(total-days)}: Enregistra la suma de les prioritats dels dies utilitzats. Necessari per optimitzar el pla en la mètrica i que s'assignin els continguts prioritzant els primers dies i consecutius perquè no hagin dies entremig sense contingut o que s'assignin als últim dies dels disponibles.
 		\item \texttt{(duration ?c - content)}: Assigna la durada de cada contingut, modelant restriccions de temps.
 		\item \texttt{(day\_duration ?d - day)}: Conté la durada acumulada dels continguts assignats a un dia.
 		\item \texttt{(remaining-content)}: Indica el nombre de continguts desitjats encara no assignats, permetent controlar l'avanç cap a l'objectiu.
+	
 	\end{itemize}
 	
 	\subsection{Accions}
@@ -178,7 +180,7 @@
 	Assigna un dia a un contingut que no té successors.
 	
 	\begin{itemize}
-		\item \textbf{Precondicions}: El contingut és desitjat, no s'ha vist, no té successors ni paral·lels sense assignar, i el dia té espai disponible.
+		\item \textbf{Precondicions}: El contingut és desitjat, no s'ha vist, no està assignat, no té successors ni paral·lels sense assignar, i el dia té espai disponible.
 		\item \textbf{Efectes}: Marca el contingut com a assignat i reserva el dia corresponent.
 	\end{itemize}
 	
@@ -189,6 +191,7 @@
 		:precondition (and 
 			(is_wanted ?c)
 			(not (watched ?c))
+			(not (assigned ?c))
 			(or 
 				(not (assigned_one ?d))
 				(not (assigned_two ?d))
@@ -225,7 +228,7 @@
 	\begin{itemize}[label={}, leftmargin=1.5em, itemsep=0pt]
 		\item \texttt{(increase (day\_duration ?d) (duration ?c))}: incrementa en duració de continguts visionats en el dia \texttt{?d} en duració de \texttt{?c} minuts de visionat.
 		
-		\item \texttt{(increase (total-days) 1)}: incrementa els dies usats.
+		\item \texttt{(increase (total-days) (priority ?d))}: incrementa la prioritat del dia en que s'ha assignat el contingut.
 		
 		\item \texttt{(decrease (remaining-content)} 1): decrementa els continguts per veure
 	\end{itemize}
@@ -234,7 +237,7 @@
 	Assigna un dia a un contingut que pot tenir predecessors o paral·lels.
 	
 	\begin{itemize}
-		\item \textbf{Precondicions}: El contingut és desitjat, compleix amb les relacions de predecessors i paral·lels, i el dia té espai disponible.
+		\item \textbf{Precondicions}: El contingut és desitjat i no està assignat, compleix amb les relacions de predecessors i paral·lels, i el dia té espai disponible.
 		\item \textbf{Efectes}: Assigna el contingut al dia seleccionat, respectant les restriccions.
 	\end{itemize}
 	
@@ -244,6 +247,7 @@
 		:parameters (?c1 ?c2 - content ?d1 ?d2 - day)
 		:precondition (and 
 			(is_wanted ?c1)
+			(not (assigned ?c1))
 			(day_to_watch ?c2 ?d2)
 			(or 
 				(not (assigned_one ?d1))
@@ -278,7 +282,7 @@
 		
 		\item \texttt{(increase (day\_duration ?d) (duration ?c))}: incrementa en duració de continguts visionats en el dia \texttt{?d} en duració de \texttt{?c} minuts de visionat.
 		
-		\item \texttt{(increase (total-days) 1)}: incrementa els dies usats.
+		\item \texttt{(increase (total-days) (priority ?d))}: incrementa la prioritat del dia en que s'ha assignat el contingut.
 		
 		\item \texttt{(decrease (remaining-content)} 1): decrementa els continguts per veure
 	\end{itemize}
@@ -343,6 +347,16 @@
 		(day_to_watch cc2 day2) ;; c2 tambe el dia 2
 	))
 	\end{lstlisting}
+	
+	\subsection{Mètrica}
+	En l'extensió 4 al utilitzar Metric Fast Forward hi ha l'opció d'afegir una mètrica que ens serveix per a que busqui un pla que optimitzi un paràmetre del problema. En el nostre cas volem que assigni el màxim de continguts per dia i que s'assignin als primers dies i consecutius, per lo que s'han assignat prioritats als dies i \texttt{total-days} conté la suma de les prioritats dels dies en que s'assignen els continguts per lo que es vol minimitzar aquest paràmetre. Per lo que afegim la següent línia de codi al problema:
+		\begin{itemize}
+		\item \texttt{(:metric minimize (total-days))} 
+	
+	\end{itemize}
+	
+	
+	
 	
 	\newpage
 	\section{Desenvolupament del Model}
@@ -448,7 +462,7 @@
 	)
 	\end{lstlisting}
 	
-	Es va afegir al fitxer problema la duració de cada contingut, així com la inicialització dels valors de \texttt{day\_duration} a 0, que guardaran posteriorment el total acumulat. Per exemple:
+	Es va afegir al fitxer problema la duració de cada contingut, així com la inicialització dels valors de \texttt{day\_duration} a 0, que guardaran posteriorment el total acumulat i de \texttt{priority} a la corresponent segons el dia(més prioritat als primers dies i valors petits). Per exemple:
 	\begin{lstlisting}[language=PDDL, caption={Novetats en la inicialització per l'extensió 4}, label={lst:iniExtensio4}]
 	(:init
 		(= (duration bb_s1) 45)
@@ -460,14 +474,16 @@
 		(= (day_duration day1) 0)
 		(= (day_duration day2) 0)
 		(= (day_duration day3) 0)
+
+		(= (priority day1) 1)
+		(= (priority day2) 2)
+		(= (priority day3) 3)
 	)
 	\end{lstlisting}
 	
 	\newpage
 	\section{Jocs de prova}
-	**************El conjunto de problemas de prueba (mínimo 2 por extensión), explicando para cada uno que es lo que intentan probar y su resultado. Podéis partir de los juegos de pruebapara el nivel básico e ir añadiendo los elementos que cada extensión requiera. Si habéisimplementado el generador de problemas, al menos uno de los juegos de prueba de cadaextensión ha de ser obtenido de este.
-	
-	En aquest apartat, presentem els jocs de prova dissenyats per a avaluar el model del problema desenvolupat en PDDL per a les diverses extensions. Aquests jocs de prova consisteixen en conjunts de problemes escollits que simulen diferents escenaris del domini, variant en complexitat i restriccions per provar diversos casos. Alguns d'aquests jocs de prova han estat generats per un fitxer en Python que genera problemes de manera aleatòria, el qual s'explica a continuació. L'objectiu d'aquests casos de prova és avaluar el bon comportament del model enfront de diverses configuracions i relacions entre els elements del problema. Els problemes generats permeten validar tant la correcció del model com la seva adequació als requisits plantejats.
+	En aquest apartat, presentem els jocs de prova dissenyats per a avaluar el model del problema desenvolupat en PDDL per a les diverses extensions. Aquests jocs de prova consisteixen en conjunts de problemes escollits que simulen diferents escenaris del domini, variant en complexitat i restriccions per provar diversos casos. Alguns d'aquests jocs de prova han estat generats per un fitxer en Python que genera problemes de manera aleatòria, el qual s'explica a continuació. L'objectiu d'aquests casos de prova és avaluar el bon comportament del model enfront de diverses configuracions i relacions entre els elements del problema. Els problemes generats permeten validar tant la correcció del model com la seva adequació als requisits plantejats. 
 	
 
 	
@@ -494,68 +510,897 @@
 	
 	\subsection{Nivell Bàsic}
 	
+	\subsubsection{Joc de prova 1}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint continguts predecessors en cadena, afegint-los al pla també complint amb les restriccions de precedència \\
+	\textbf{Entrada}: Tenim 10 continguts en total, es desitgen veure 2 continguts. Hi ha 5 dies disponibles. Un contingut té 4 continguts predecessors en cadena i l'altre també té un altre predecessor. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP1B})\\
+	\textbf{Sortida esperada}: S'espera que el planificador assigni per veure els 5 continguts en precedència encadenada als 5 dies consecutius i els altres dos continguts en dos dies consecutius qualssevol. \\
+	\textbf{Sortida obtinguda}:  Les restriccions de  precedència es compleixen.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	
+	\begin{verbatim}
+	Planificación por día:
+	
+	DAY1: BB_S1, CC1
+	DAY2: CC2, BB_S2
+	DAY3: BB_S3
+	DAY4: BB_S4
+	DAY5: BB_S5
+		
+	\end{verbatim}
+	
+	\subsubsection{Joc de prova 2}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint com a molt un predecessor als continguts desitjats per veure, afegint-los al pla també i que es respectin les precedències de visualització. Veure que es poden assignar continguts sense límit a un dia. \\
+	\textbf{Entrada}: Tenim 9 continguts totals, dels quals 6 es volen veure, 2 ja s'han vist, un dels dos és predecessor d'un contingut desitjat i un altre apart predecessor d'un altre desitjat. Només hi ha 2 dies disponibles. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP2B})\\
+	\textbf{Sortida esperada}: El planificador hauria d'assignar en els 2 dies els dos continguts predecessors i la resta que no s'han vist i es volen repartits entre els dos dies ja que no hi ha límit per dia. \\
+	\textbf{Sortida obtinguda}: Les restriccions de 
+	precedència es compleix, no s'assignen els que ja s'han vist i s'han assignat al primer dia la resta de continguts. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	
+	\begin{verbatim}
+	Planificación por día:
+	
+	DAY1: A3, A5, A6, A7, A8, B1
+	DAY2: A4
+		
+	\end{verbatim}
+	
+	
+	\noindent
+	\begin{minipage}[t]{0.45\textwidth}
+		\begin{lstlisting}[language=PDDL, caption={Joc de Prova 1 - Nivell Bàsic}, label={lst:JP1B}]                     
+			(define (problem redflix-problem)
+			(:domain redflix)
+			
+			(:objects
+			bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
+			day1 day2 day3 day4 day5 - day)
+			
+			(:init
+			
+			(is_wanted bb_s5)
+			(is_wanted cc2)
+			
+			(predecessor bb_s1 bb_s2)
+			(predecessor bb_s2 bb_s3)
+			(predecessor bb_s3 bb_s4)
+			(predecessor bb_s4 bb_s5)
+			(predecessor cc1 cc2)
+			
+			;; Dias anteriores
+			(yesterday day1 day2)
+			(yesterday day2 day3)
+			(yesterday day3 day4)
+			(yesterday day4 day5))
+			
+			(:goal (and
+				(day_to_watch bb_s1 day1)
+				(assigned cc1)))
+			)
+			
+			
+		\end{lstlisting}
+		
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.45\textwidth}
+		\begin{lstlisting}[language=PDDL, caption={Joc de Prova 2 - Nivell Bàsic}, label={lst:JP2B}]                     
+		(define (problem redflix-problem)
+			(:domain redflix)
+			
+			(:objects
+			a1 a2 a3 a4 a5 a6 a7 a8 b1 - content
+			day1 day2 - day)
+			
+			(:init
+
+			(watched a1)
+			(watched a2)
+
+			(is_wanted a3)
+			(is_wanted a4)
+			(is_wanted a5)
+			(is_wanted a6)
+			(is_wanted a7)
+			(is_wanted a8)
+			
+			(predecessor b1 a4)
+			(predecessor a1 a3)
+			
+			(yesterday day1 day2))
+			
+			(:goal (and
+				(assigned a3)
+				(assigned a4)
+				(assigned a5)
+				(assigned a6)
+				(assigned a7)   
+				(assigned a8)
+				(assigned b1)))
+			)
+			
+			
+		\end{lstlisting}
+	\end{minipage}
+	
+	
 	\subsection{Extensió 1}
+	
+	
+	\subsubsection{Joc de prova 1}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint diversos continguts predecessors els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència. Veure que es poden assignar continguts sense límit a un dia. \\
+	\textbf{Entrada}: Tenim 10 continguts en total, es desitgen veure 2 continguts. Hi ha només 2 dies disponibles. Un contingut té 4 continguts predecessors en cadena i l'altre també té 2 altres predecessor. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP11})\\
+	\textbf{Sortida esperada}: S'espera que el planificador assigni tots els continguts predecessors, que son 6, dels continguts desitjats al dia 1 i els desitjats al dia 2. \\
+	\textbf{Sortida obtinguda}:  Les restriccions de  precedència es compleixen.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors. Veiem que al dia 1 s'afegeixen tots els predecessors sense límit. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	
+	\begin{verbatim}
+	Planificación por día:
+	
+	DAY1: CC1, AA1, BB_S1, BB_S2, BB_S3, BB_S4
+	DAY2: BB_S5, CC2
+		
+	\end{verbatim}
+	
+	\subsubsection{Joc de prova 2}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint diversos continguts predecessors els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència, sense que s'afegeixin els que ja s'han vist. \\
+	\textbf{Entrada}: Tenim 8 continguts totals, dels quals 2 es volen veure, 3 ja s'han vist, dos dels tres són predecessor d'un contingut desitjat. Hi ha 5 dies disponibles. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP21})\\
+	\textbf{Sortida esperada}: El planificador hauria d'assignar en un dia un contingut desitjat i el dia anterior els seus predecessors que no s'han vist i el contingut desitjat que queda en qualsevol dia. \\
+	\textbf{Sortida obtinguda}: Les restriccions de 
+	precedència es compleix, no s'assignen els que ja s'han vist i s'han assignat al primer dia els que son predecessors i entre els dos primers dies els continguts desitjats. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	
+	\begin{verbatim}
+	Planificación por día:
+	
+	DAY1: CC2, BB_S1, BB_S2
+	DAY2: BB_S5
+		
+	\end{verbatim}
+	
+	
+	\noindent
+	\begin{minipage}[t]{0.45\textwidth}
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 1 - Extensió 1}, label={lst:JP11}]                     
+	(define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+	bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
+	day1 day2 - day)
+	
+	(:init
+
+	(is_wanted bb_s5)
+	(is_wanted cc2)
+	
+	(predecessor bb_s1 bb_s5)
+	(predecessor bb_s2 bb_s5)
+	(predecessor bb_s3 bb_s5)
+	(predecessor bb_s4 bb_s5)
+	(predecessor cc1 cc2)
+	(predecessor aa1 cc2)
+	
+	;; Dias anteriores
+	(yesterday day1 day2))
+	
+	(:goal (and
+		(assigned bb_s1)
+		(assigned bb_s2)
+		(assigned bb_s3)
+		(assigned bb_s4)
+		(assigned cc1)
+		(assigned aa1)))
+	)
+	
+	
+	
+	\end{lstlisting}
+		
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.45\textwidth}
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 2 - Extensió 1}, label={lst:JP21}]                     
+	(define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+	bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 cc1 cc2 w1 - content
+	day1 day2 day3 day4 day5 - day)
+	
+	(:init
+
+	(watched bb_s4)
+	(watched bb_s3)
+	(watched w1)
+
+	(is_wanted bb_s5)
+	(is_wanted cc2)
+	
+	(predecessor bb_s1 bb_s5)
+	(predecessor bb_s2 bb_s5)
+	(predecessor bb_s3 bb_s5)
+	(predecessor bb_s4 bb_s5)
+	
+	(yesterday day1 day2)
+	(yesterday day2 day3)
+	(yesterday day3 day4)
+	(yesterday day4 day5))
+	
+	(:goal (and
+		(assigned bb_s1)
+		(assigned bb_s2)
+		(assigned cc2)))
+	)
+	
+			
+		\end{lstlisting}
+	\end{minipage}
+	
+	
 	
 	\subsection{Extensió 2}
 	
+	\subsubsection{Joc de prova 1}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint diversos continguts predecessors i paral·lels els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència. Veure que es poden assignar continguts sense límit a un dia. \\
+	\textbf{Entrada}: Tenim 8 continguts en total, es desitgen veure 1 continguts. Hi ha 5 dies disponibles. Un contingut té 4 continguts predecessors en cadena i 3 continguts paral·lels. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP12})\\
+	\textbf{Sortida esperada}: S'espera que el planificador assigni els continguts predecessors en cadena en els 5 dies disponibles i que els paral·lels al contingut desitjat un dia abans o el mateix dia. \\
+	\textbf{Sortida obtinguda}:  Les restriccions de  precedència i paral·lelisme es compleixen.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors i paral·lels. Veiem que al dia anterior al desitjat s'afegeixen tots els paral·lels sense límit. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	
+	\begin{verbatim}
+	Planificación por día:
+	
+	DAY1: BB_S1
+	DAY2: BB_S2
+	DAY3: BB_S3
+	DAY4: BB_S4, AA1, AA2, AA3
+	DAY5: BB_S5
+		
+	\end{verbatim}
+	
+	\subsubsection{Joc de prova 2}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint diversos continguts paral·lels els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència, sense que s'afegeixin els que ja s'han vist. \\
+	\textbf{Entrada}: Tenim 10 continguts totals, dels quals només es vol veure un, 2 ja s'han vist, els quals són paral·lels del contingut desitjat. La resta de continguts son paral·lels al contingut desitjat. Hi ha 2 dies disponibles. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP22})\\
+	\textbf{Sortida esperada}: El planificador hauria d'assignar en un dia el contingut desitjat i entre el dia anterior i el mateix dia tots els seus paral·lels que no s'han vist encara. \\
+	\textbf{Sortida obtinguda}: Les restriccions de 
+	paral·lelisme es compleix, no s'assignen els que ja s'han vist i s'han assignat al primer dia els que son paral·lels i el segon dia el desitjat. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	
+	\begin{verbatim}
+	DAY1: AA1, AA2, AA3, CC1, BB_S3, BB_S4, BB_S5
+	DAY2: CC2
+		
+	\end{verbatim}
+	
+	
+	\noindent
+	\begin{minipage}[t]{0.45\textwidth}
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 1 - Extensió 2}, label={lst:JP12}]                     
+	(define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+	bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 - content
+	day1 day2 day3 day4 day5 - day)
+
+	(:init
+	
+	(is_wanted bb_s5)
+	
+	;;predecesores
+	(predecessor bb_s1 bb_s2)
+	(predecessor bb_s2 bb_s3)
+	(predecessor bb_s3 bb_s4)
+	(predecessor bb_s4 bb_s5)
+	
+	;;paralelos
+	(parallel aa1 bb_s5)
+	(parallel aa2 bb_s5)
+	(parallel aa3 bb_s5)
+	
+	;; Dias anteriores
+	(yesterday day1 day2)
+	(yesterday day2 day3)
+	(yesterday day3 day4)
+	(yesterday day4 day5))
+	
+	(:goal (and
+		(day_to_watch bb_s1 day1)
+		(assigned aa1)
+		(assigned aa2)
+		(assigned aa3)))
+	)
+	
+	\end{lstlisting}
+		
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.45\textwidth}
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 2 - Extensió 2}, label={lst:JP22}]                     
+	(define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+	bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
+	day1 day2 - day)
+	
+	(:init
+
+	(watched bb_s1)
+	(watched bb_s2)
+	(is_wanted cc2)
+	
+	(parallel cc1 cc2)
+	(parallel aa1 cc2)
+	(parallel aa2 cc2)
+	(parallel aa3 cc2)
+	(parallel bb_s5 cc2)
+	(parallel bb_s4 cc2)
+	(parallel bb_s3 cc2)
+	(parallel bb_s2 cc2)
+	(parallel bb_s1 cc2)
+	
+	(yesterday day1 day2))
+	
+	(:goal (and
+		(assigned aa1)
+		(assigned aa2)
+		(assigned aa3)
+		(assigned cc1)
+		(assigned bb_s3)
+		(assigned bb_s4)
+		(assigned bb_s5)))
+	)
+	
+	
+		\end{lstlisting}
+	\end{minipage}
+	
+	
 	\subsection{Extensió 3}
-		\begin{lstlisting}[language=PDDL, caption={Novetats en la inicialització per l'extensió 4}, label={lst:iniExtensio4}]
+	
+	\subsubsection{Joc de prova 1}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint més d'un contingut predecessors i paral·lel als continguts desitjats per veure, afegint-los al pla també i que es respectin les restriccions de visualització. I comprovar que no s'afegeixin al pla continguts ja vists que siguin predecessors als desitjats i tampoc els següents dels desitjats.  \\
+	\textbf{Entrada}: Tenim 13 continguts en total, es desitgen veure bb\_s5, bb\_s3, aa2, cc1, cc2 i cc3, i s'han vist bb\_s4 i aa1. Hi ha només 3 dies disponibles. El contingut bb\_s5 és predecessor d'un contingut i paral·lel d'un altre; té 3 continguts predecessors i un d'aquests un altre predecessors; i a més 2 paral·lels. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP13})\\
+	\textbf{Sortida esperada}: S'espera que el planificador assigni per veure 9 dels 13 continguts totals distribuïts entre els 3 dies. Al dia 3 el contingut bb\_s5 i el seu paral·lel ja que el dia anterior s'ha d'assignar els seus 3 predecessors i a l'anterior l'altre predecessor. I finalment els altres 3 continguts distribuïts en els dies on encara hi hagi lloc. \\
+	\textbf{Sortida obtinguda}:  Les restriccions de continguts per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors i paral·lels. No estan afegits els continguts que ja s'han vist i son predecessors i tampoc els següents del que es vol veure. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	
+	\begin{verbatim}
+	Planificación por día:
+	
+	DAY1: CC3, BB_S1, BB_S0
+	DAY2: CC2, BB_S3, BB_S2
+	DAY3: CC1, BB_S5, AA2
+		
+	\end{verbatim}
+	
+	\subsubsection{Joc de prova 2}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint continguts predecessors i paral·lels als continguts desitjats per veure, afegint-los al pla també i que es respectin les restriccions de visualització. \\
+	\textbf{Entrada}: Tenim 5 continguts, cadascun predecessor d'un altre en cadena on el que no és predecessor de cap és vol veure (bb\_s5). També tenim 3 continguts paral·lels a l'anterior que es vol veure i dos continguts més on un es vol veure i l'altre és predecessor d'aquest. Hi ha 5 dies disponibles per assignar els continguts. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP23})\\
+	\textbf{Sortida esperada}: El planificador hauria d'assignar els 5 continguts bb\_sx un a cada dia en ordre ascendent ja que son predecessors en cadena, assignant al dia 5 el contingut bb\_s5. Els paral·lels a bb\_s5 haurien d'estar entre el dia 4 i 5, respectant el màxim de 3 continguts per dia. Per últim els dos altres continguts en dies consecutius respectant lo del predecessor.\\
+	\textbf{Sortida obtinguda}: Les restriccions de continguts per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca. Estan afegits al pla tots els continguts desitjats amb els seus predecessors i paral·lels. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	
+	\begin{verbatim}
+		Planificación por día:
+		
+		DAY1: CC1, BB_S1
+		DAY2: CC2, BB_S2
+		DAY3: BB_S3
+		DAY4: BB_S4, AA3
+		DAY5: BB_S5, AA1, AA2
+		
+	\end{verbatim}
+	
+	
+	\noindent
+	\begin{minipage}[t]{0.45\textwidth}
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 1 - Extensió 3}, label={lst:JP13}]                     
+	(define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+	bb_s0 bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 bb_s6 bb_s7 aa1 aa2 cc1 cc2 cc3 - content
+	day1 day2 day3  - day)
+	
+	(:init
+	;; Contenidos ya vistos
+	(watched bb_s4)
+	(watched aa1)
+	
+	;; Contenidos por ver
+	(is_wanted bb_s5)
+	(is_wanted bb_s3)
+	(is_wanted aa2)
+	(is_wanted cc1)
+	(is_wanted cc2)
+	(is_wanted cc3)
+	
+	;; Relaciones entre contenidos
+	;;predecesores
+	(predecessor bb_s0 bb_s2)
+	(predecessor bb_s1 bb_s2)
+	(predecessor bb_s2 bb_s5)
+	(predecessor bb_s3 bb_s5)
+	(predecessor bb_s4 bb_s5)
+	(predecessor bb_s5 bb_s6)
+	
+	;;paralelos
+	(parallel aa1 bb_s5)
+	(parallel aa2 bb_s5)
+	(parallel bb_s5  bb_s7)
+	
+	;; Dias anteriores
+	(yesterday day1 day2)
+	(yesterday day2 day3))
+	
+	(:goal (and
+		(assigned bb_s1)
+		(assigned bb_s0)
+		(assigned bb_s3)
+		(assigned aa2)
+		(assigned cc1)
+		(assigned cc2)
+		(assigned cc3)))
+	)
+	
+	
+\end{lstlisting}
+	
+	\end{minipage}
+	\hfill
+	\begin{minipage}[t]{0.45\textwidth}
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 2 - Extensió 3}, label={lst:JP23}]                    (define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+	bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
+	day1 day2 day3 day4 day5 day6 day7 - day)
+	
+	(:init
+	(is_wanted bb_s5)
+	(is_wanted cc2)
+	
+	(predecessor bb_s1 bb_s2)
+	(predecessor bb_s2 bb_s3)
+	(predecessor bb_s3 bb_s4)
+	(predecessor bb_s4 bb_s5)
+	(predecessor cc1 cc2)
+	
+	(parallel aa1 bb_s5)
+	(parallel aa2 bb_s5)
+	(parallel aa3 bb_s5)
+	
+	(yesterday day1 day2)
+	(yesterday day2 day3)
+	(yesterday day3 day4)
+	(yesterday day4 day5)
+	)
+	
+	(:goal
+	(and
+	(day_to_watch bb_s1 day1)
+	(assigned aa1)
+	(assigned aa2)
+	(assigned aa3)
+	(assigned cc1)))
+	)
+
+		
+	\end{lstlisting}
+	\end{minipage}
+	
+	\subsubsection{Joc de prova Random}
+	\textbf{Objectiu}: Aquest joc de prova està fet pel generador de problemes i es vol comprobar qur també és capaç de planificar un problema generat amb configuracions aleatòries.\\
+	\textbf{Entrada}: Tenim 21 continguts, 5 dels quals són predecessors d'un altre en cadena que són els que interessen ja que els últims de la cadena es desitgen veure. Un altre contingut apart es desitja veure. Un d'aquests té un contingut paral·lel. Després hi ha definides més relacions però que no son rellevants. Hi ha 9 dies disponibles per assignar els continguts. En el listing d'avall es pot veure el codi del problema sencer detalladament(\ref{lst:JPR3})\\
+	\textbf{Sortida esperada}: S'espera que el planificador assigni els 5 continguts predecessors en cadena en 5 dies consecutius ja que son predecessors del contingut desitjat. Que el paral·lel a un d'aquests continguts predecessors estigui en el mateix dia o el anterior i l'últim contingut que queda en qualsevol que càpiga. \\
+	\textbf{Sortida obtinguda}: Les restriccions de continguts per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca. El planificador ha trobat un pla que respecta les restriccions d'un problema aleatori.  Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:\\
+	
+	\begin{verbatim}
+	Planificación por día:
+	
+	DAY1: C10, C1
+	DAY2: C2
+	DAY3: C3, C18
+	DAY4: C4
+	DAY5: C5
+	\end{verbatim}
+	
+		\begin{lstlisting}[language=PDDL, caption={Joc de Prova Random - Extensió 3}, label={lst:JPR3}]                  
+	(define (problem random-redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+	c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 c18 w1 w2 w3 - content
+	day1 day2 day3 day4 day5 day6 day7 day8 day9 - day)
+	
+	(:init
+	(predecessor c1 c2)
+	(predecessor c2 c3)
+	(predecessor c3 c4)
+	(predecessor c4 c5)
+	(predecessor c12 c13)
+	(predecessor c13 c14)
+	(predecessor c16 c17)
+	(predecessor w1 c1)
+	
+	(parallel c9 c12)
+	(parallel c18 c3)
+	(parallel c15 c9)
+	(parallel w2 c12)
+	(parallel w3 c12)
+	
+	(is_wanted c4)
+	(is_wanted c10)
+	(is_wanted c5)
+	
+	(watched w1)
+	(watched w2)
+	(watched w3)
+	
+	(yesterday day1 day2)
+	(yesterday day2 day3)
+	(yesterday day3 day4)
+	(yesterday day4 day5)
+	(yesterday day5 day6)
+	(yesterday day6 day7)
+	(yesterday day7 day8)
+	(yesterday day8 day9))
+	
+	(:goal
+	(and
+	(day_to_watch c1 day1)
+	(assigned c18)
+	(assigned c10)))
+	)
+	  
+		
+		
+	\end{lstlisting}
+	
+	\subsection{Extensió 4}
+	\subsubsection{Joc de prova 1}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint més d'un contingut predecessors en cadena i paral·lels als continguts desitjats per veure, afegint-los al pla també i que es respectin les restriccions de visualització. Observar que no s'assignin continguts a més d'un dia.  \\
+	\textbf{Entrada}: Tenim 17 continguts en total, es desitgen veure 2. Hi ha només 12 dies disponibles. Un d'aquests continguts té un predecessor i l'altre té 3 paral·ls i 11 predecessors en cadena. Tots tenen una duració entre 50 i 100 minuts. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP14})\\
+	\textbf{Sortida esperada}: S'espera que el planificador assigni per veure tots els continguts totals distribuïts entre tots els dies. Entre els 12 dies s'han d'assignar els 12 continguts predecessors en cadena i en els dos últims dies els paral·lels al contingut desitjat. I els altres dos continguts predecessors en dies consecutius lo més propers de dies. \\
+	\textbf{Sortida obtinguda}:  Les restriccions de temps per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca. Els continguts cc1 i cc2 s'han assignat als dies més pròxims en els dies 1 i 2. Estan afegits al pla tots els continguts desitjats amb els seus predecessors i paral·lels. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	
+	\begin{verbatim}
+	Planificación por día:
+	
+	DAY1: CC1, BB_S1
+	DAY10: BB_S10
+	DAY11: BB_S11, AA1, AA3
+	DAY12: BB_S12, AA2
+	DAY2: CC2, BB_S2
+	DAY3: BB_S3
+	DAY4: BB_S4
+	DAY5: BB_S5
+	DAY6: BB_S6
+	DAY7: BB_S7
+	DAY8: BB_S8
+	DAY9: BB_S9
+	\end{verbatim}
+	
+	
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 1 - Extensió 4
+		}, label={lst:JP14}]                     
 		(define (problem redflix-problem)
 		(:domain redflix)
 		
 		(:objects
-		bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 aa1 aa2 aa3 cc1 cc2 - content
-		day1 day2 day3 day4 day5 day6 day7 - day
-		)
+		bb_s1 bb_s2 bb_s3 bb_s4 bb_s5 bb_s6 bb_s7 bb_s8 bb_s9 bb_s10 bb_s11 bb_s12 aa1 aa2 aa3 cc1 cc2 - content
+		day1 day2 day3 day4 day5 day6 day7 day8 day9 day10 day11 day12 - day)
 		
 		(:init
-		(is_wanted bb_s5)
-		(is_wanted cc2)
-		
+		(is_wanted bb_s12)	(is_wanted cc2)
 		(predecessor bb_s1 bb_s2)
 		(predecessor bb_s2 bb_s3)
 		(predecessor bb_s3 bb_s4)
 		(predecessor bb_s4 bb_s5)
+		(predecessor bb_s5 bb_s6)
+		(predecessor bb_s6 bb_s7)
+		(predecessor bb_s7 bb_s8)
+		(predecessor bb_s8 bb_s9)
+		(predecessor bb_s9 bb_s10)
+		(predecessor bb_s10 bb_s11)
+		(predecessor bb_s11 bb_s12)
 		(predecessor cc1 cc2)
-		
-		(parallel aa1 bb_s5)
-		(parallel aa2 bb_s5)
-		(parallel aa3 bb_s5)
-		
+		(parallel aa1 bb_s12)
+		(parallel aa2 bb_s12)
+		(parallel aa3 bb_s12)
 		(yesterday day1 day2)
 		(yesterday day2 day3)
 		(yesterday day3 day4)
 		(yesterday day4 day5)
-		)
-		
-		(:goal
-		(and
-		(day_to_watch bb_s1 day1)
-		(assigned aa1)
-		(assigned aa2)
-		(assigned aa3)
-		(assigned cc1)))
-		)
-		
-	\end{lstlisting}
-	
-	\begin{lstlisting}[language=PDDL, caption={Novetats en la inicialització per l'extensió 4}, label={lst:iniExtensio4}]
-		(:init
-		(= (duration bb_s1) 45)
-		(= (duration bb_s2) 50)
-		(= (duration bb_s3) 60)
-		(= (duration cc1) 30)
-		(= (duration cc2) 25)
-		
+		(yesterday day5 day6)
+		(yesterday day6 day7)
+		(yesterday day7 day8)
+		(yesterday day8 day9)
+		(yesterday day9 day10)
+		(yesterday day10 day11)
+		(yesterday day11 day12)
+		(= (duration bb_s1) 50)
+		(= (duration bb_s2) 70)
+		(= (duration bb_s3) 80)
+		(= (duration bb_s4) 50)
+		(= (duration bb_s5) 70)
+		(= (duration bb_s6) 80)
+		(= (duration bb_s7) 50)
+		(= (duration bb_s8) 70)
+		(= (duration bb_s9) 80)
+		(= (duration bb_s10) 50)
+		(= (duration bb_s11) 70)
+		(= (duration bb_s12) 90)
+		(= (duration cc1) 60)
+		(= (duration cc2) 100)
+		(= (duration aa1) 50)
+		(= (duration aa2) 70)
+		(= (duration aa3) 80)
 		(= (day_duration day1) 0)
 		(= (day_duration day2) 0)
 		(= (day_duration day3) 0)
+		(= (day_duration day4) 0)
+		(= (day_duration day5) 0)
+		(= (day_duration day6) 0)
+		(= (day_duration day7) 0)
+		(= (day_duration day8) 0)
+		(= (day_duration day9) 0)
+		(= (day_duration day10) 0)
+		(= (day_duration day11) 0)
+		(= (day_duration day12) 0)
+		(= (priority day1) 1)	(= (priority day2) 2)
+		(= (priority day3) 3)   (= (priority day4) 4)
+		(= (priority day5) 5)   (= (priority day6) 6)
+		(= (priority day7) 7)   (= (priority day8) 8)
+		(= (priority day9) 9)   (= (priority day10) 10)
+		(= (priority day11) 11) (= (priority day12) 12)
+		(= (total-days) 0)
+		(= (remaining-content) 17))
+		
+		(:goal (and
+		(= (remaining-content) 0)))
+		(:metric minimize (total-days))
 		)
+		
+		
 	\end{lstlisting}
 	
-	\subsection{Extensió 4}
+	\subsubsection{Joc de prova 2}
+	\textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint continguts predecessors i paral·lels als continguts desitjats per veure, afegint-los al pla també, sense afegir els que ja s'han vist. Fent èmfasi en el compliment del màxim de minuts per dia i en la minimització de dies i que siguin els primers. \\
+	\textbf{Entrada}: Tenim 16 continguts en total, dels quals es volen veure 2. Un dels que es desitja té un predecessor i aquest predecessor té 7 predecessors més, els quals tenen una duració baixa de 20 minuts i un ja s'ha vist, i 3 paral·lels amb 30 minuts de duració. Hi ha 10 dies disponibles. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP24})\\
+	\textbf{Sortida esperada}: El planificador hauria d'assignar el contingut desitjat al tercer dia, el seu predecessor el dia anterior juntament amb els seus paral·lels i els 6 continguts predecessors no vists en un mateix dia el primer dia, minimitzant el dies així.\\
+	\textbf{Sortida obtinguda}: Les restriccions de continguts per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca. El primer dia s'han assignat el màxim de continguts possibles on estan tots els predecessors i algun paral·lel.Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
 	
+	\begin{verbatim}
+	Planificación por día:
 	
+	DAY1: C2, C1, A1, A2, A3, A5, A6, A7
+	DAY2: B1, C3, C4
+	DAY3: B2
+		
+	\end{verbatim}
+	
+		
+	
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova 2 - Extensió 4}, label={lst:JP24}]                    
+	(define (problem redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+	a1 a2 a3 a4 a5 a6 a7 b1 b2 b3 c1 c2 c3 c4 d1 d2 - content
+	day1 day2 day3 day4 day5 day6 day7 day8 day9 day10 - day)
+
+	(:init
+	(watched a4)
+	(watched d1)
+	;; Contenidos por ver
+	(is_wanted b2)
+	(is_wanted c2)
+	
+	(predecessor a1 b1)
+	(predecessor a2 b1)
+	(predecessor a3 b1)
+	(predecessor a4 b1)
+	(predecessor a5 b1)
+	(predecessor a6 b1)
+	(predecessor a7 b1)
+	(predecessor b1 b2)
+	(predecessor b2 d2)
+	
+	;;paralelos
+	(parallel c1 b1)
+	(parallel c2 b1)
+	(parallel c3 b1)
+	(parallel c4 b1)
+	;; Dias anteriores
+	(yesterday day1 day2)
+	(yesterday day2 day3)
+	(yesterday day3 day4)
+	(yesterday day4 day5)
+	(yesterday day5 day6)
+	(yesterday day6 day7)
+	(yesterday day7 day8)
+	(yesterday day8 day9)
+	(yesterday day9 day10)
+	
+	(= (duration a1) 20)
+	(= (duration a2) 20)
+	(= (duration a3) 20)
+	(= (duration a4) 20)
+	(= (duration a5) 20)
+	(= (duration a6) 20)
+	(= (duration a7) 20)
+	(= (duration b1) 70)
+	(= (duration b2) 80)
+	(= (duration b3) 50)
+	(= (duration c1) 30)
+	(= (duration c2) 30)
+	(= (duration c3) 30)
+	(= (duration c4) 30)
+	(= (duration d1) 60)
+	(= (duration d2) 60)
+	(= (day_duration day1) 0)
+	(= (day_duration day2) 0)
+	(= (day_duration day3) 0)
+	(= (day_duration day4) 0)
+	(= (day_duration day5) 0)
+	(= (day_duration day6) 0)
+	(= (day_duration day7) 0)
+	(= (day_duration day8) 0)
+	(= (day_duration day9) 0)
+	(= (day_duration day10) 0)
+	
+	(= (priority day1) 1)
+	(= (priority day2) 2)
+	(= (priority day3) 3)
+	(= (priority day4) 4)
+	(= (priority day5) 5)
+	(= (priority day6) 6)
+	(= (priority day7) 7)
+	(= (priority day8) 8)
+	(= (priority day9) 9)
+	(= (priority day10) 10)
+	
+	(= (total-days) 0)
+	(= (remaining-content) 12) 
+
+	(:goal (and
+		(= (remaining-content) 0)))
+	(:metric minimize (total-days))
+	)
+		
+	\end{lstlisting}
+
+	
+	\subsubsection{Joc de prova Random}
+	\textbf{Objectiu}: Aquest joc de prova està fet pel generador de problemes i es vol comprobar qur també és capaç de planificar un problema generat amb configuracions aleatòries i assigni els continguts als dies més propers possible complint les restriccions de temps per dia.\\
+	\textbf{Entrada}: Tenim 20 continguts, dels quals 9 son desitjats de veure. Entre ells hi ha establertes relacions de predecessors i paral·lels i només un apart és predecessor d'un dels desitjats. Hi ha un paral·lel a un contingut desitjat però ja s'ha vist. Hi ha 14 dies disponibles. Les duracions dels dies han estat assignades de manera aleatòria per lo que està variat. En el listing d'avall es pot veure el codi del problema sencer detalladament(\ref{lst:JPR4})\\
+	\textbf{Sortida esperada}: S'espera que el planificador assigni els 4 continguts predecessors en cadena que hi ha, que son desitjats tots menys un, en 4 dies consecutius. Que el parell de paral·lels i el de consecutius més estigui en el mateix dia o en consecutius segons pertoqui; i, els últims continguts que queda en qualsevol que càpiga. Com a molt ocupi 6 dies i que siguin els primers 6 dies.\\
+	\textbf{Sortida obtinguda}: Les restriccions de temps per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca. El planificador ha trobat un pla que respecta les restriccions d'un problema aleatori.  Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:\\
+	
+	\begin{verbatim}
+	Planificación por día:
+	
+	DAY1: C11, C14
+	DAY2: C7, C8
+	DAY3: C9, C1
+	DAY4: C17, C2
+	DAY5: C3
+	DAY6: C4
+	\end{verbatim}
+	
+	\begin{lstlisting}[language=PDDL, caption={Joc de Prova Random - Extensió 4}, label={lst:JPR4}]                  
+	(define (problem random-redflix-problem)
+	(:domain redflix)
+	
+	(:objects
+	c1 c2 c3 c4 c5 c6 c7 c8 c9 c10 c11 c12 c13 c14 c15 c16 c17 w1 w2 w3 - content
+	day1 day2 day3 day4 day5 day6 day7 day8 day9 day10 day11 day12 day13 day14 - day
+	)
+	
+	(:init
+	(predecessor c1 c2)
+	(predecessor c2 c3)
+	(predecessor c3 c4)
+	(predecessor c4 c5)
+	(predecessor c8 c9)
+	(predecessor c11 c12)
+	(predecessor c12 c13)
+	(predecessor c15 c16)
+	(predecessor w1 c5)
+	
+	(parallel c7 c6)
+	(parallel c14 c7)
+	(parallel w3 c4)
+	
+	(is_wanted c4)
+	(is_wanted c9)
+	(is_wanted c11)
+	(is_wanted c17)
+	(is_wanted c7)
+	(is_wanted c14)
+	(is_wanted c2)
+	(is_wanted c3)
+	(is_wanted c8)
+	
+	(watched w1)
+	(watched w2)
+	(watched w3)
+	
+	(= (duration c1) 87)
+	(= (duration c2) 58)
+	(= (duration c3) 59)
+	(= (duration c4) 90)
+	(= (duration c5) 66)
+	(= (duration c6) 52)
+	(= (duration c7) 65)
+	(= (duration c8) 97)
+	(= (duration c9) 70)
+	(= (duration c10) 111)
+	(= (duration c11) 78)
+	(= (duration c12) 83)
+	(= (duration c13) 112)
+	(= (duration c14) 91)
+	(= (duration c15) 68)
+	(= (duration c16) 44)
+	(= (duration c17) 102)
+	(= (duration w1) 102)
+	(= (duration w2) 52)
+	(= (duration w3) 75)
+	
+	(yesterday day1 day2)
+	(yesterday day2 day3)
+	(yesterday day3 day4)
+	(yesterday day4 day5)
+	(yesterday day5 day6)
+	(yesterday day6 day7)
+	(yesterday day7 day8)
+	(yesterday day8 day9)
+	(yesterday day9 day10)
+	(yesterday day10 day11)
+	(yesterday day11 day12)
+	(yesterday day12 day13)
+	(yesterday day13 day14)
+	
+	(= (day_duration day1) 0)
+	(= (day_duration day2) 0)
+	(= (day_duration day3) 0)
+	(= (day_duration day4) 0)
+	(= (day_duration day5) 0)
+	(= (day_duration day6) 0)
+	(= (day_duration day7) 0)
+	(= (day_duration day8) 0)
+	(= (day_duration day9) 0)
+	(= (day_duration day10) 0)
+	(= (day_duration day11) 0)
+	(= (day_duration day12) 0)
+	(= (day_duration day13) 0)
+	(= (day_duration day14) 0)
+	
+	(= (priority day1) 1)
+	(= (priority day2) 2)
+	(= (priority day3) 3)
+	(= (priority day4) 4)
+	(= (priority day5) 5)
+	(= (priority day6) 6)
+	(= (priority day7) 7)
+	(= (priority day8) 8)
+	(= (priority day9) 9)
+	(= (priority day10) 10)
+	(= (priority day11) 11)
+	(= (priority day12) 12)
+	(= (priority day13) 13)
+	(= (priority day14) 14)
+	
+	(= (total-days) 0)
+	(= (remaining-content) 10)
+	)
+	
+	(:goal
+	(and
+	(= (remaining-content) 0)
+	)
+	)
+	
+	(:metric minimize (total-days))
+	)
+
+		
+	\end{lstlisting}
 	
 	\newpage
 	\section{Conclusió}
