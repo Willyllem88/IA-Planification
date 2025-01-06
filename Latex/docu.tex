@@ -614,18 +614,18 @@
 	
 	\noindent \textbf{Definició de l'objectiu i mètrica}:
 	
-	Es posa també l'objectiu i la mètrica a optimitzar que es igual sempre.	
+	Es posa també l'objectiu i la mètrica a optimitzar que és igual sempre.	
 	
 	\subsection{Nivell Bàsic}
 	
 	\subsubsection*{Joc de prova 1}
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint continguts predecessors en cadena, afegint-los al pla també complint amb les restriccions de precedència \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint continguts predecessors en cadena, afegint-los al pla també complint amb les restriccions de precedència \\
 	
 	\noindent \textbf{Entrada}: Tenim 10 continguts en total, es desitgen veure 2 continguts. Hi ha 5 dies disponibles. Un contingut té 4 continguts predecessors en cadena i l'altre també té un altre predecessor. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP1B}) \\
 	
 	\noindent \textbf{Sortida esperada}: S'espera que el planificador assigni per veure els 5 continguts en precedència encadenada als 5 dies consecutius i els altres dos continguts en dos dies consecutius qualssevol. \\
 	
-	\noindent \textbf{Sortida obtinguda}:  Les restriccions de  precedència es compleixen.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	\noindent \textbf{Sortida obtinguda}: Les restriccions de  precedència es compleixen. Estan afegits al pla tots els continguts desitjats amb els seus predecessors. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
 	
 	\begin{figure}[H]
 		\centering
@@ -643,7 +643,7 @@
 	
 	
 	\subsubsection*{Joc de prova 2}
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint com a molt un predecessor als continguts desitjats per veure, afegint-los al pla també i que es respectin les precedències de visualització. Veure que es poden assignar continguts sense límit a un dia. \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint com a molt un predecessor als continguts desitjats per veure, afegint-los al pla també i que es respectin les precedències de visualització. Veure que es poden assignar continguts sense límit a un dia. \\
 	
 	\noindent \textbf{Entrada}: Tenim 9 continguts totals, dels quals 6 es volen veure, 2 ja s'han vist, un dels dos és predecessor d'un contingut desitjat i un altre apart predecessor d'un altre desitjat. Només hi ha 2 dies disponibles. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP2B}) \\
 	
@@ -741,13 +741,13 @@
 	
 	\subsubsection*{Joc de prova 1}
 	
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint diversos continguts predecessors els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència. Veure que es poden assignar continguts sense límit a un dia. \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint diversos continguts predecessors els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència. Veure que es poden assignar continguts sense límit a un dia. \\
 	
 	\noindent \textbf{Entrada}: Tenim 10 continguts en total, es desitgen veure 2 continguts. Hi ha només 2 dies disponibles. Un contingut té 4 continguts predecessors en cadena i l'altre també té 2 altres predecessor. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP11}) \\
 	
 	\noindent \textbf{Sortida esperada}: S'espera que el planificador assigni tots els continguts predecessors, que son 6, dels continguts desitjats al dia 1 i els desitjats al dia 2. \\
 	
-	\noindent \textbf{Sortida obtinguda}:  Les restriccions de  precedència es compleixen.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors. Veiem que al dia 1 s'afegeixen tots els predecessors sense límit. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	\noindent \textbf{Sortida obtinguda}: Les restriccions de precedència es compleixen. Estan afegits al pla tots els continguts desitjats amb els seus predecessors. Veiem que al dia 1 s'afegeixen tots els predecessors sense límit. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
 	
 	\begin{figure}[H]
 		\centering
@@ -762,7 +762,7 @@
 	
 	\subsubsection*{Joc de prova 2}
 	
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint diversos continguts predecessors els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència, sense que s'afegeixin els que ja s'han vist. \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint diversos continguts predecessors els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència, sense que s'afegeixin els que ja s'han vist. \\
 	
 	\noindent \textbf{Entrada}: Tenim 8 continguts totals, dels quals 2 es volen veure, 3 ja s'han vist, dos dels tres són predecessor d'un contingut desitjat. Hi ha 5 dies disponibles. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP21}) \\
 	
@@ -859,13 +859,13 @@
 	\subsection{Extensió 2}
 	
 	\subsubsection*{Joc de prova 1}
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint diversos continguts predecessors i paral·lels els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència. Veure que es poden assignar continguts sense límit a un dia. \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint diversos continguts predecessors i paral·lels els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència. Veure que es poden assignar continguts sense límit a un dia. \\
 	
 	\noindent \textbf{Entrada}: Tenim 8 continguts en total, es desitgen veure 1 continguts. Hi ha 5 dies disponibles. Un contingut té 4 continguts predecessors en cadena i 3 continguts paral·lels. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP12}) \\
 	
 	\noindent \textbf{Sortida esperada}: S'espera que el planificador assigni els continguts predecessors en cadena en els 5 dies disponibles i que els paral·lels al contingut desitjat un dia abans o el mateix dia. \\
 	
-	\noindent \textbf{Sortida obtinguda}:  Les restriccions de  precedència i paral·lelisme es compleixen.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors i paral·lels. Veiem que al dia anterior al desitjat s'afegeixen tots els paral·lels sense límit. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	\noindent \textbf{Sortida obtinguda}: Les restriccions de precedència i paral·lelisme es compleixen.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors i paral·lels. Veiem que al dia anterior al desitjat s'afegeixen tots els paral·lels sense límit. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
 	
 	\begin{figure}[H]
 		\centering
@@ -882,7 +882,7 @@
 	\end{figure}
 	
 	\subsubsection*{Joc de prova 2}
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint diversos continguts paral·lels els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència, sense que s'afegeixin els que ja s'han vist. \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint diversos continguts paral·lels els continguts desitjats, afegint-los al pla també complint amb les restriccions de precedència, sense que s'afegeixin els que ja s'han vist. \\
 	
 	\noindent \textbf{Entrada}: Tenim 10 continguts totals, dels quals només es vol veure un, 2 ja s'han vist, els quals són paral·lels del contingut desitjat. La resta de continguts son paral·lels al contingut desitjat. Hi ha 2 dies disponibles. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP22})\\
 	
@@ -983,13 +983,13 @@
 	
 	\subsubsection*{Joc de prova 1}
 	
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint més d'un contingut predecessors i paral·lel als continguts desitjats per veure, afegint-los al pla també i que es respectin les restriccions de visualització. I comprovar que no s'afegeixin al pla continguts ja vists que siguin predecessors als desitjats i tampoc els següents dels desitjats.  \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint més d'un contingut predecessor i paral·lel als continguts desitjats per veure, afegint-los al pla també i que es respectin les restriccions de visualització. I comprovar que no s'afegeixin al pla continguts ja vists que siguin predecessors als desitjats i tampoc els següents dels desitjats.  \\
 	
 	\noindent \textbf{Entrada}: Tenim 13 continguts en total, es desitgen veure bb\_s5, bb\_s3, aa2, cc1, cc2 i cc3, i s'han vist bb\_s4 i aa1. Hi ha només 3 dies disponibles. El contingut bb\_s5 és predecessor d'un contingut i paral·lel d'un altre; té 3 continguts predecessors i un d'aquests un altre predecessors; i a més 2 paral·lels. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP13})\\
 	
 	\noindent \textbf{Sortida esperada}: S'espera que el planificador assigni per veure 9 dels 13 continguts totals distribuïts entre els 3 dies. Al dia 3 el contingut bb\_s5 i el seu paral·lel ja que el dia anterior s'ha d'assignar els seus 3 predecessors i a l'anterior l'altre predecessor. I finalment els altres 3 continguts distribuïts en els dies on encara hi hagi lloc. \\
 	
-	\noindent \textbf{Sortida obtinguda}:  Les restriccions de continguts per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors i paral·lels. No estan afegits els continguts que ja s'han vist i son predecessors i tampoc els següents del que es vol veure. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
+	\noindent \textbf{Sortida obtinguda}: Les restriccions de continguts per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca.  Estan afegits al pla tots els continguts desitjats amb els seus predecessors i paral·lels. No estan afegits els continguts que ja s'han vist i són predecessors i tampoc els següents del que es vol veure. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
 	
 	\begin{figure}[H]
 		\centering
@@ -1006,11 +1006,11 @@
 	
 	\subsubsection*{Joc de prova 2}
 	
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint continguts predecessors i paral·lels als continguts desitjats per veure, afegint-los al pla també i que es respectin les restriccions de visualització. \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint continguts predecessors i paral·lels als continguts desitjats per veure, afegint-los al pla també i que es respectin les restriccions de visualització. \\
 	
-	\noindent \textbf{Entrada}: Tenim 5 continguts, cadascun predecessor d'un altre en cadena on el que no és predecessor de cap és vol veure (bb\_s5). També tenim 3 continguts paral·lels a l'anterior que es vol veure i dos continguts més on un es vol veure i l'altre és predecessor d'aquest. Hi ha 5 dies disponibles per assignar els continguts. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP23})\\
+	\noindent \textbf{Entrada}: Tenim 5 continguts, cadascun predecessor d'un altre en cadena on el que no és predecessor de cap es vol veure (bb\_s5). També tenim 3 continguts paral·lels a l'anterior que es vol veure i dos continguts més on un es vol veure i l'altre és predecessor d'aquest. Hi ha 5 dies disponibles per assignar els continguts. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP23})\\
 	
-	\noindent \textbf{Sortida esperada}: El planificador hauria d'assignar els 5 continguts bb\_sx un a cada dia en ordre ascendent ja que son predecessors en cadena, assignant al dia 5 el contingut bb\_s5. Els paral·lels a bb\_s5 haurien d'estar entre el dia 4 i 5, respectant el màxim de 3 continguts per dia. Per últim els dos altres continguts en dies consecutius respectant lo del predecessor.\\
+	\noindent \textbf{Sortida esperada}: El planificador hauria d'assignar els 5 continguts bb\_sx un a cada dia en ordre ascendent ja que són predecessors en cadena, assignant al dia 5 el contingut bb\_s5. Els paral·lels a bb\_s5 haurien d'estar entre el dia 4 i 5, respectant el màxim de 3 continguts per dia. Per últim els dos altres continguts en dies consecutius respectant lo del predecessor.\\
 	
 	\noindent \textbf{Sortida obtinguda}: Les restriccions de continguts per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca. Estan afegits al pla tots els continguts desitjats amb els seus predecessors i paral·lels. Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:
 	
@@ -1194,7 +1194,7 @@
 	\subsection{Extensió 4}
 	\subsubsection*{Joc de prova 1}
 	
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint més d'un contingut predecessors en cadena i paral·lels als continguts desitjats per veure, afegint-los al pla també i que es respectin les restriccions de visualització. Observar que no s'assignin continguts a més d'un dia.  \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint més d'un contingut predecessor en cadena i paral·lels als continguts desitjats per veure, afegint-los al pla també i que es respectin les restriccions de visualització. Observar que no s'assignin continguts a més d'un dia.  \\
 	
 	\noindent \textbf{Entrada}: Tenim 17 continguts en total, es desitgen veure 2. Hi ha només 12 dies disponibles. Un d'aquests continguts té un predecessor i l'altre té 3 paral·ls i 11 predecessors en cadena. Tots tenen una duració entre 50 i 100 minuts. En el listing d'avall es pot veure el codi del problema.  detalladament(\ref{lst:JP14}) \\
 	
@@ -1307,7 +1307,7 @@
 	\end{lstlisting}
 	
 	\subsubsection*{Joc de prova 2}
-	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador es capaç de planificar correctament tenint continguts predecessors i paral·lels als continguts desitjats per veure, afegint-los al pla també, sense afegir els que ja s'han vist. Fent èmfasi en el compliment del màxim de minuts per dia i en la minimització de dies i que siguin els primers. \\
+	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint continguts predecessors i paral·lels als continguts desitjats per veure, afegint-los al pla també, sense afegir els que ja s'han vist. Fent èmfasi en el compliment del màxim de minuts per dia i en la minimització de dies i que siguin els primers. \\
 	
 	\noindent \textbf{Entrada}: Tenim 16 continguts en total, dels quals es volen veure 2. Un dels que es desitja té un predecessor i aquest predecessor té 7 predecessors més, els quals tenen una duració baixa de 20 minuts i un ja s'ha vist, i 3 paral·lels amb 30 minuts de duració. Hi ha 10 dies disponibles. En el listing d'avall es pot veure el codi del problema detalladament(\ref{lst:JP24})\\
 	
@@ -1425,7 +1425,7 @@
 	
 	\noindent \textbf{Entrada}: Tenim 20 continguts, dels quals 9 son desitjats de veure. Entre ells hi ha establertes relacions de predecessors i paral·lels i només un apart és predecessor d'un dels desitjats. Hi ha un paral·lel a un contingut desitjat però ja s'ha vist. Hi ha 14 dies disponibles. Les duracions dels dies han estat assignades de manera aleatòria per lo que està variat. En el listing d'avall es pot veure el codi del problema sencer detalladament(\ref{lst:JPR4})\\
 	
-	\noindent \textbf{Sortida esperada}: S'espera que el planificador assigni els 4 continguts predecessors en cadena que hi ha, que son desitjats tots menys un, en 4 dies consecutius. Que el parell de paral·lels i el de consecutius més estigui en el mateix dia o en consecutius segons pertoqui; i, els últims continguts que queda en qualsevol que càpiga. Com a molt ocupi 6 dies i que siguin els primers 6 dies.\\
+	\noindent \textbf{Sortida esperada}: S'espera que el planificador assigni els 4 continguts predecessors en cadena que hi ha, que són desitjats tots menys un, en 4 dies consecutius. Que el parell de paral·lels i el de consecutius més estigui en el mateix dia o en consecutius segons pertoqui; i, els últims continguts que queda en qualsevol que càpiga. Com a molt ocupi 6 dies i que siguin els primers 6 dies.\\
 	
 	\noindent \textbf{Sortida obtinguda}: Les restriccions de temps per dia es respecten i també els continguts paral·lels i predecessors es veuen quan toca. El planificador ha trobat un pla que respecta les restriccions d'un problema aleatori.  Podem veure a continuació el resultat del pla que ha trobat dia per dia i coincideix amb el que s'esperava:\\
 	
