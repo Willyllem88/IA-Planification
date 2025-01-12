@@ -88,7 +88,7 @@
 	
 	\subsection{Variables}
 	
-	Les variables que representen el nostre domini son dues, aquestes seran subtipus de la variable \texttt{object}. Vegeu-les a continuació:
+	Les variables que representen el nostre domini són dues, aquestes seran subtipus de la variable \texttt{object}. Vegeu-les a continuació:
 	
 	\begin{itemize}
 		\item \textbf{\texttt{content}}: Representa els continguts audiovisuals (capítols o pel·lícules).
@@ -97,7 +97,7 @@
 	
 	\subsection{Predicats}
 	
-	Els predicats representen les relacions i restriccions entre els continguts i els dies i són la base per definir les precondicions i efectes de les accions. Mostrarem primer els predicats del problema amb \textbf{Nivell senzill}. I a continuació afegirem els predicats conforme avancem per les diferents extensions.
+	Els predicats representen les relacions i restriccions entre els continguts i els dies i són la base per definir les precondicions i efectes de les accions. Mostrarem primer els predicats del problema amb \textbf{Nivell senzill}. I a continuació afegirem els predicats a mesura que avancem per les diferents extensions.
 	
 	\begin{itemize}
 		\item \texttt{(watched ?c - content)}: Indica que un contingut \texttt{?c} ja s'ha vist i no cal assignar-lo al plan si es tracta d'algun predecessor o paral·lel d'algun contingut que es desitja veure. Aquest predicat és estrictament necessari per poder establir quins continguts del catàleg ja han sigut visionats i no afegir-los cíclicament en el pla de visionat.
@@ -108,7 +108,7 @@
 		\item \texttt{(assigned ?c - content)}: Marca que un contingut \texttt{?c} ja té un dia assignat per evitar que s'assigni a més de un dia. Aquest predicat no és estrictament necessari, però ens redueix la complexitat del sistema, podriem utilitzar un \texttt{exists} de \texttt{day\_to\_watch} del contingut \texttt{?c}. Aquesta operació tindria un cost molt elevat en precondicions, per això hem optat per aquesta predicat auxiliar.
 	\end{itemize}
 	
-	\noindent Aquests son els predicats del \textbf{Nivell bàsic}, ara enumerarem els predicats de les altres extensions: \\
+	\noindent Aquests són els predicats del \textbf{Nivell bàsic}, ara enumerarem els predicats de les altres extensions: \\
 	
 	\noindent \textbf{Extensió 1}: Els predicats romanen iguals, l'únic que canviarà serà la post condició quan s'assigni un contingut a un dia. \\
 	
@@ -120,7 +120,7 @@
 		\tabto{2cm} \texttt{(parallel ?c2 ?c1)}
 	\end{itemize}
 	
-	\noindent \textbf{Extensió 3}: Apareixen tres predicats nous, cada un indicant quin dels tres continguts de cada dia han sigut ja assignats. En comptes d'afegir tres predicats nous podríem haver optat per usar el paquet de PDDL \texttt{:fluents} per comptabilitzar el número de continguts que s'han assignat en un dia. Però vam optar per aquesta solució perquè el nombre d'assignacions per dia estava fitat a tres que és un número petit. A més, d'aquesta manera, fèiem que el programa seguís funcionant amb \texttt{Fast Forward v2.3.} i no haver d'optar per un altre planificador automàtic. Els tres predicats nous són:
+	\noindent \textbf{Extensió 3}: Apareixen tres predicats nous, cada un indicant quin dels tres continguts de cada dia han sigut ja assignats. En comptes d'afegir tres predicats nous podríem haver optat per usar el paquet de PDDL \texttt{:fluents} per comptabilitzar el número de continguts que s'han assignat en un dia. Però vam optar per aquesta solució perquè el nombre d'assignacions per dia estava fitat a tres que és un número petit. A més, d'aquesta manera, fèiem que el programa continués funcionant amb \texttt{Fast Forward v2.3.} i no haver d'optar per un altre planificador automàtic. Els tres predicats nous són:
 	
 	\begin{itemize}
 		\item \texttt{(assigned\_one ?d - day)}: S'ha assignat el primer contingut el dia \texttt{?d}.
@@ -128,7 +128,7 @@
 		\item \texttt{(assigned\_three ?d - day)}: S'ha assignat el tercer contingut el dia \texttt{?d}.
 	\end{itemize}
 	
-	\noindent \textbf{Extensió 4}: Els tres predicats de la extensió anterior són retirats. Tampoc s'afegeix cap predicat nou en aquesta extensió. En aquesta extensió es farà ús de fluents, s'explicarà a continuació.
+	\noindent \textbf{Extensió 4}: Els tres predicats de l'extensió anterior són retirats. Tampoc s'afegeix cap predicat nou en aquesta extensió. En aquesta extensió es farà ús de fluents, s'explicarà a continuació.
 	
 	\subsection{Funcions}
 	
@@ -136,7 +136,7 @@
 	
 	\begin{itemize}
 		\item \texttt{(priority ?d - day)}: Indica la prioritat assignada a un dia, per poder optimitzar la distribució dels continguts en dies.
-		\item \texttt{(total-days)}: Enregistra la suma de les prioritats dels dies utilitzats. Necessari per optimitzar el pla en la mètrica i que s'assignin els continguts prioritzant els primers dies i consecutius perquè no hagin dies entremig sense contingut o que s'assignin als últim dies dels disponibles.
+		\item \texttt{(total-days)}: Enregistra la suma de les prioritats dels dies utilitzats. Necessari per optimitzar el pla en la mètrica i que s'assignin els continguts prioritzant els primers dies i consecutius perquè no hi hagi dies entremig sense contingut o que s'assignin als últims dies dels disponibles.
 		\item \texttt{(duration ?c - content)}: Assigna la durada de cada contingut, modelant restriccions de temps.
 		\item \texttt{(day\_duration ?d - day)}: Conté la durada acumulada dels continguts assignats a un dia.
 		\item \texttt{(remaining-content)}: Indica el nombre de continguts desitjats encara no assignats, permetent controlar l'avanç cap a l'objectiu.
@@ -145,15 +145,20 @@
 	
 	\subsection{Accions}
 	
-	En totes les extensions hem fet ús de tres accions. Per explicar-les farem una breu desprescripció del seu funcionament i explicarem les diferents iteracions que han tingut al llarg de les diferents extensions. Per simplificar, direm que tenim dos planificadors diferents, el de la \textbf{Extensió 3} i el de la \textbf{Extensió 4}, si les accions d'aquests dos planificadors son diferents, analitzarem en que canvien. \\
+	En totes les extensions hem fet ús de tres accions. Les tres accions descrites, add\_content, set\_day\_unique i set\_day, són fonamentals per garantir el funcionament del programa. Primer de tot per afegir els continguts desitjats al pla i, per altra banda, per gestionar l’assignació de dies als continguts, diferenciant entre aquells que són independents i els que tenen relacions amb altres continguts. \\
 	
-	Les 3 accions són les següents:
+	Es va dividir l'acció d'assignació de dies en dos operadors (set\_day\_unique i set\_day) per gestionar de manera específica continguts amb dependències i sense, simplificant així les precondicions i efectes de cada acció.\\
+	
+	Per explicar cada una d'aquestes accions farem una breu desprescripció del seu funcionament i explicarem les diferents iteracions que han tingut al llarg de les extensions. Per simplificar, direm que tenim dos planificadors diferents, el de la \textbf{Extensió 3} i el de la \textbf{Extensió 4}, si les accions d'aquests dos planificadors són diferents, analitzarem en què canvien. \\
+	
+	Les tres accions són les següents:
 	
 	\subsubsection*{add\_content}
 	
 	Aquesta acció afegeix al pla de visionat continguts que l'usuari vol veure, o que el sistema vol que l'usuari vegi.
 	
 	\begin{itemize}
+		\item \textbf{Justificació de l'operador}: Sense aquesta acció, el sistema no podria garantir que tots els continguts relacionats s’afegeixin de manera automàtica al pla un cop els seus predecessors ja han estat vistos.
 		\item \textbf{Precondicions}: El contingut no s'ha vist i és desitjat (\texttt{is\_wanted}).
 		\item \textbf{Efectes}: Inclou els predecessors o continguts paral·lels a la llista de continguts desitjats.
 	\end{itemize}
@@ -182,6 +187,7 @@
 	Assigna un dia a un contingut que no té successors ni és paral·lel amb altres.
 	
 	\begin{itemize}
+		\item \textbf{Justificació de l'operador}: Aquesta acció permet assignar un dia a continguts no tenen successors ni paral·lels. És crucial per garantir que els continguts sense relacions siguin assignats de manera eficient.
 		\item \textbf{Precondicions}: El contingut és desitjat, no s'ha vist, no està assignat, el dia té espai disponible (no més de tres continguts), i no té successors ni paral·lels.
 		\item \textbf{Efectes}: Marca el contingut com a assignat i reserva el dia corresponent.
 	\end{itemize}
@@ -236,6 +242,7 @@
 	Assigna un dia a un contingut que pot tenir predecessors o paral·lels.
 	
 	\begin{itemize}
+		\item \textbf{Justificació de l'operador}: Aquesta acció permet gestionar les relacions temporals i garantir que els continguts es visualitzin en l'ordre correcte. Sense aquesta acció, el planificador no podria garantir que els continguts amb dependències es distribueixin correctament al llarg del pla, respectant l’ordre i les restriccions definides.
 		\item \textbf{Precondicions}: El contingut és desitjat, no està assignat, compleix amb les relacions de predecessors o paral·lels, i el dia té espai disponible.
 		\item \textbf{Efectes}: Assigna el contingut al dia seleccionat, respectant les restriccions.
 	\end{itemize}
@@ -664,7 +671,7 @@
 	\subsubsection*{Joc de prova 2}
 	\noindent \textbf{Objectiu}: Aquest joc de prova està dissenyat per avaluar si el planificador és capaç de planificar correctament tenint com a molt un predecessor als continguts desitjats per veure, afegint-los al pla també i que es respectin les precedències de visualització. Veure que es poden assignar continguts sense límit a un dia. \\
 	
-	\noindent \textbf{Entrada}: Tenim 9 continguts totals, dels quals 6 es volen veure, 2 ja s'han vist, un dels dos és predecessor d'un contingut desitjat i un altre apart predecessor d'un altre desitjat. Només hi ha 2 dies disponibles. En el \textit{listing} d'avall es pot veure el codi del problema detalladament(\ref{lst:JP2B}) \\
+	\noindent \textbf{Entrada}: Tenim 9 continguts totals, dels quals 6 es volen veure, 2 ja s'han vist, un dels dos és predecessor d'un contingut desitjat i un altre a part predecessor d'un altre desitjat. Només hi ha 2 dies disponibles. En el \textit{listing} d'avall es pot veure el codi del problema detalladament(\ref{lst:JP2B}) \\
 	
 	\noindent \textbf{Sortida esperada}: El planificador hauria d'assignar en els 2 dies els dos continguts predecessors i la resta que no s'han vist i es volen repartits entre els dos dies ja que no hi ha límit per dia. \\
 	
